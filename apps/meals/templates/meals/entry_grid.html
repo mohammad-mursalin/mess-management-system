@@ -1,0 +1,265 @@
+{% extends 'base_manager.html' %}
+{% load meal_extras %}
+{% block title %}Meal Entry — {{ open_cycle.label|default:"No open cycle" }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --color-bg: #F7F8FA;
+        --color-surface: #FFFFFF;
+        --color-border: #E2E5E9;
+        --color-text-primary: #1F2430;
+        --color-text-muted: #6B7280;
+        --color-primary: #2E6F5E;
+        --color-primary-hover: #255A4C;
+        --color-danger: #B3413B;
+        --color-success: #3E8E5A;
+        --color-accent: #C97B2E;
+    }
+
+    .page-header {
+        margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--color-text-primary);
+    }
+
+    .date-selector-bar {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .date-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .date-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        font-size: 16px;
+        cursor: pointer;
+        font-family: inherit;
+        padding: 0;
+    }
+
+    .date-arrow:hover:not(:disabled) {
+        background: var(--color-bg);
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
+    .date-arrow:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .date-input {
+        padding: 6px 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+        color: var(--color-text-primary);
+        background: var(--color-surface);
+    }
+
+    .date-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(46, 111, 94, 0.15);
+    }
+
+    .date-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-left: 4px;
+    }
+
+    .cycle-closed-badge {
+        margin-left: 8px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(107, 114, 128, 0.12);
+        color: var(--color-text-muted);
+    }
+
+    .counts-section {
+        margin-bottom: 20px;
+    }
+
+    .counts-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+        .counts-row { grid-template-columns: 1fr; }
+    }
+
+    .count-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 16px 20px;
+        text-align: center;
+    }
+
+    .count-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+    }
+
+    .count-value {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--color-primary);
+    }
+
+    .table-wrap {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .meal-grid {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .meal-grid thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .meal-grid th {
+        background: var(--color-bg);
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .col-member { width: 28%; }
+    .col-meal { width: 24%; }
+
+    .meal-grid td {
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--color-border);
+        vertical-align: middle;
+        font-size: 14px;
+    }
+
+    .meal-grid tr:last-child td {
+        border-bottom: none;
+    }
+
+    .member-name {
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+
+    .meal-cell {
+        display: flex;
+        gap: 4px;
+    }
+
+    .meal-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        padding: 4px 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background-color 0.1s, border-color 0.1s, color 0.1s;
+    }
+
+    .meal-btn:hover:not(:disabled) {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
+    .meal-btn.active {
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        color: #FFFFFF;
+    }
+
+    .meal-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .cell-error {
+        color: var(--color-danger);
+        font-size: 11px;
+        margin-top: 4px;
+        line-height: 1.3;
+    }
+
+    .empty-row {
+        text-align: center;
+        color: var(--color-text-muted);
+        padding: 32px 16px;
+    }
+
+    .empty-state {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 32px;
+        text-align: center;
+        color: var(--color-text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Meal Entry</h1>
+    </div>
+    <div id="grid-area">
+        {% include 'meals/partials/grid_body.html' with open_cycle=open_cycle member_cycles=member_cycles entry_map=entry_map selected_date=selected_date prev_date=prev_date next_date=next_date counts=counts no_open_cycle=no_open_cycle BREAKFAST_CHOICES=BREAKFAST_CHOICES LUNCH_CHOICES=LUNCH_CHOICES DINNER_CHOICES=DINNER_CHOICES %}
+    </div>
+{% endblock %}

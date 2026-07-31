@@ -1,0 +1,24 @@
+{% load meal_extras %}
+<td>
+    <div class="meal-cell" id="cell-{{ mc.id }}-{{ meal_type }}">
+        {% for val, label in meal_choices %}
+            {% with current_val=entry|meal_value:meal_type %}
+            <button
+                type="button"
+                hx-post="{% url 'meal_cell_update' %}"
+                hx-vals='{
+                    "member_cycle_id": "{{ mc.id }}",
+                    "entry_date": "{{ entry_date|date:"Y-m-d" }}",
+                    "meal_type": "{{ meal_type }}",
+                    "value": "{{ val }}"
+                }'
+                hx-target="#cell-{{ mc.id }}-{{ meal_type }}"
+                class="meal-btn{% if current_val and current_val == val %} active{% endif %}"
+            >{{ label }}</button>
+            {% endwith %}
+        {% endfor %}
+    </div>
+    {% if cell_error %}
+        <div class="cell-error">{{ cell_error }}</div>
+    {% endif %}
+</td>

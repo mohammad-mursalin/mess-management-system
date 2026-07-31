@@ -1,0 +1,68 @@
+{% load meal_extras %}
+
+{% if no_open_cycle %}
+    <div class="empty-state">
+        <p>No open cycle. Open a new cycle in the Cycles admin to start entering meals.</p>
+    </div>
+{% else %}
+
+    <!-- Date selector -->
+    <div class="date-selector-bar">
+        <form hx-get="{% url 'entry_grid' %}" hx-target="#grid-area" class="date-form">
+            <button type="submit" name="date" value="{{ prev_date|date:'Y-m-d' }}"
+                    class="date-arrow"
+                    {% if prev_date < open_cycle.start_date %}disabled{% endif %}>&lt;</button>
+            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
+                   onchange="this.form.submit()" class="date-input">
+            <button type="submit" name="date" value="{{ next_date|date:'Y-m-d' }}"
+                    class="date-arrow"
+                    {% if open_cycle.end_date and next_date > open_cycle.end_date %}disabled{% endif %}>&gt;</button>
+            <span class="date-label">{{ selected_date|date:"D, M j, Y" }}</span>
+            {% if open_cycle.status == 'closed' %}
+                <span class="cycle-closed-badge">Cycle closed</span>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Today's counts -->
+    <div id="counts-summary" class="counts-section">
+        {% include 'meals/partials/counts_summary.html' with counts=counts selected_date=selected_date %}
+    </div>
+
+    <!-- Meal grid table -->
+    <div class="table-wrap">
+        <table class="meal-grid">
+            <thead>
+                <tr>
+                    <th class="col-member">Member</th>
+                    <th class="col-meal">Breakfast</th>
+                    <th class="col-meal">Lunch</th>
+                    <th class="col-meal">Dinner</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mc in member_cycles %}
+                    <tr>
+                        <td class="member-name">{{ mc.member.name }}</td>
+                        {% with entry=entry_map|dict_get:mc.id %}
+                            {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='breakfast' meal_choices=BREAKFAST_CHOICES %}
+                            {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='lunch' meal_choices=LUNCH_CHOICES %}
+                            {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='dinner' meal_choices=DINNER_CHOICES %}
+                        {% endwith %}
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-row">No active members in the current cycle.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if not member_cycles and not no_open_cycle %}
+        <div class="empty-state">
+            <p>No members are eligible for this date. Check join/leave dates.</p>
+        </div>
+    {% endif %}
+
+{% endif %}

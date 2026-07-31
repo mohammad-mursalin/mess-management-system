@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mess Dashboard{% endblock %}</title>
+    <style>
+        :root {
+            --color-bg: #F7F8FA;
+            --color-surface: #FFFFFF;
+            --color-border: #E2E5E9;
+            --color-text-primary: #1F2430;
+            --color-text-muted: #6B7280;
+            --color-primary: #2E6F5E;
+            --color-primary-hover: #255A4C;
+            --color-accent: #C97B2E;
+            --color-danger: #B3413B;
+            --color-success: #3E8E5A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            background-color: var(--color-bg);
+            min-height: 100vh;
+        }
+
+        .public-page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .public-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 24px;
+        }
+
+        .public-header .mess-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .public-header .cycle-label {
+            font-size: 14px;
+            color: var(--color-text-muted);
+        }
+
+        .public-header .cycle-label .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 6px;
+        }
+
+        .badge-open {
+            background: rgba(62, 142, 90, 0.12);
+            color: var(--color-success);
+        }
+
+        .badge-closed {
+            background: rgba(107, 114, 128, 0.12);
+            color: var(--color-text-muted);
+        }
+
+        .public-footer {
+            text-align: center;
+            padding: 24px 0;
+            font-size: 12px;
+            color: var(--color-text-muted);
+            border-top: 1px solid var(--color-border);
+            margin-top: 32px;
+        }
+
+        {% block extra_head %}{% endblock %}
+    </style>
+    {% block extra_js %}{% endblock %}
+</head>
+<body>
+    <div class="public-page">
+        <header class="public-header">
+            <span class="mess-name">🍚 Mess Manager</span>
+            {% if current_cycle %}
+            <span class="cycle-label">
+                {{ current_cycle.label }}
+                <span class="badge badge-{{ current_cycle.status }}">
+                    {{ current_cycle.status }}
+                </span>
+            </span>
+            {% else %}
+            <span class="cycle-label">No active cycle</span>
+            {% endif %}
+        </header>
+
+        {% block content %}{% endblock %}
+
+        <footer class="public-footer">
+            {% block footer %}
+            Data updated by mess manager. Contact manager for corrections.
+            {% endblock %}
+        </footer>
+    </div>
+</body>
+</html>

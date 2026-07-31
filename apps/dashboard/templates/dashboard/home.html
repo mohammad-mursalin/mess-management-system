@@ -1,0 +1,236 @@
+{% extends 'base_public.html' %}
+{% block title %}Mess Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dashboard-updated {
+        font-size: 12px;
+        color: var(--color-text-muted);
+        margin-bottom: 24px;
+    }
+
+    /* Today's meal count cards */
+    .today-counts {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .count-card {
+        flex: 1;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .count-card .meal-label {
+        font-size: 12px;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .count-card .meal-count {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--color-text-primary);
+    }
+
+    @media (max-width: 480px) {
+        .today-counts {
+            flex-direction: column;
+        }
+    }
+
+    /* Members table */
+    .members-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .members-table th {
+        background: var(--color-surface);
+        color: var(--color-text-muted);
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 12px 16px;
+        text-align: left;
+        cursor: pointer;
+        user-select: none;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .members-table th.sortable:hover {
+        color: var(--color-primary);
+    }
+
+    .members-table th .sort-indicator {
+        margin-left: 4px;
+        font-size: 11px;
+        opacity: 0.4;
+    }
+
+    .members-table th.sort-asc .sort-indicator.asc {
+        opacity: 1;
+        color: var(--color-primary);
+    }
+
+    .members-table th.sort-desc .sort-indicator.asc {
+        opacity: 1;
+        color: var(--color-primary);
+    }
+
+    .members-table th.sort-asc .sort-indicator.desc,
+    .members-table th.sort-desc .sort-indicator.desc {
+        opacity: 1;
+        color: var(--color-primary);
+    }
+
+    .members-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--color-border);
+        text-align: left;
+    }
+
+    .members-table tbody tr:hover {
+        background: var(--color-bg);
+    }
+
+    .members-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .members-table td.numeric {
+        text-align: right;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-updated">
+        Last updated: {{ last_updated|date:"M d, Y \a\t g:i A" }}
+    </div>
+
+    <section class="today-counts">
+        <div class="count-card">
+            <div class="meal-label">Breakfast</div>
+            <div class="meal-count">{{ today_counts.breakfast_count }}</div>
+        </div>
+        <div class="count-card">
+            <div class="meal-label">Lunch</div>
+            <div class="meal-count">{{ today_counts.lunch_count }}</div>
+        </div>
+        <div class="count-card">
+            <div class="meal-label">Dinner</div>
+            <div class="meal-count">{{ today_counts.dinner_count }}</div>
+        </div>
+    </section>
+
+    <section>
+        <table class="members-table">
+            <thead>
+                <tr>
+                    <th class="sortable" data-col="name">
+                        Name<span class="sort-indicator">⇅</span>
+                    </th>
+                    <th class="sortable" data-col="deposit" data-type="number">
+                        Deposit Given<span class="sort-indicator">⇅</span>
+                    </th>
+                    <th class="sortable" data-col="breakfast" data-type="number">
+                        Breakfast<span class="sort-indicator">⇅</span>
+                    </th>
+                    <th class="sortable" data-col="lunch" data-type="number">
+                        Lunch<span class="sort-indicator">⇅</span>
+                    </th>
+                    <th class="sortable" data-col="dinner" data-type="number">
+                        Dinner<span class="sort-indicator">⇅</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="members-tbody">
+                {% for member in members %}
+                <tr data-name="{{ member.name }}"
+                    data-deposit="{{ member.deposit }}"
+                    data-breakfast="{{ member.breakfast }}"
+                    data-lunch="{{ member.lunch }}"
+                    data-dinner="{{ member.dinner }}">
+                    <td>{{ member.name }}</td>
+                    <td class="numeric">₹{{ member.deposit }}</td>
+                    <td class="numeric">{{ member.breakfast }}</td>
+                    <td class="numeric">{{ member.lunch }}</td>
+                    <td class="numeric">{{ member.dinner }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center;padding:24px;color:var(--color-text-muted);">
+                        No members in the current cycle.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}
+
+{% block footer %}
+Data updated by mess manager. Contact manager for corrections.
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var tbody = document.getElementById('members-tbody');
+    if (!tbody) return;
+
+    var headers = tbody.closest('table').querySelectorAll('th.sortable');
+    var currentCol = null;
+    var currentDir = 'asc';
+
+    headers.forEach(function(th) {
+        th.addEventListener('click', function() {
+            var col = th.getAttribute('data-col');
+            var type = th.getAttribute('data-type') || 'text';
+
+            if (col === currentCol) {
+                currentDir = currentDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentCol = col;
+                currentDir = 'asc';
+            }
+
+            headers.forEach(function(h) { h.classList.remove('sort-asc', 'sort-desc'); });
+            th.classList.add(currentDir === 'asc' ? 'sort-asc' : 'sort-desc');
+
+            var rows = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort(function(a, b) {
+                var va = a.getAttribute('data-' + col);
+                var vb = b.getAttribute('data-' + col);
+
+                if (type === 'number') {
+                    va = parseFloat(va) || 0;
+                    vb = parseFloat(vb) || 0;
+                }
+
+                if (va < vb) return currentDir === 'asc' ? -1 : 1;
+                if (va > vb) return currentDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            rows.forEach(function(row) { tbody.appendChild(row); });
+        });
+    });
+})();
+</script>
+{% endblock %}

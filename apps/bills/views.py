@@ -1,0 +1,100 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+
+from cycles.models import Cycle
+from .models import FixedBill
+from .forms import FixedBillForm
+
+
+def open_cycle():
+    return Cycle.objects.filter(status='open').first()
+
+
+def _bills_for(cycle):
+    if not cycle:
+        return FixedBill.objects.none()
+    return (
+        FixedBill.objects
+        .select_related('cycle')
+        .filter(cycle=cycle)
+        .order_by('-bill_date', '-id')
+    )
+
+
+def _ctx(cycle, bills, form, editing_bill, editing):
+    return {
+        'current_cycle': cycle,
+        'has_cycle': cycle is not None,
+        'bills': bills,
+        'bill_form': form,
+        'editing_bill': editing_bill,
+        'is_editing': editing,
+    }
+
+
+@login_required
+def bill_list(request):
+    c = open_cycle()
+    bills = _bills_for(c)
+    form = FixedBillForm(cycle=c) if c else FixedBillForm()
+    return render(request, 'bills/bill_list.html', _ctx(c, bills, form, None, False))
+
+
+@login_required
+def bill_add(request):
+    c = open_cycle()
+    if not c:
+        messages.error(
+            request,
+            "Open a cycle in the Cycles admin before logging fixed bills.",
+        )
+        return redirect('fixed_bill_list')
+    form = FixedBillForm(request.POST, cycle=c)
+    if form.is_valid():
+        bill = form.save(commit=False)
+        bill.cycle = c
+        bill.save()
+        messages.success(
+            request,
+            f"Fixed bill ({bill.get_bill_type_display()}) of \u20b9{bill.amount} saved.",
+        )
+        return redirect('fixed_bill_list')
+    return render(
+        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, None, False)
+    )
+
+
+@login_required
+def bill_edit(request, bill_id):
+    bill = get_object_or_404(FixedBill, pk=bill_id)
+    c = bill.cycle
+    form = FixedBillForm(request.POST or None, instance=bill, cycle=c)
+    return render(
+        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, bill, True)
+    )
+
+
+@login_required
+def bill_update(request, bill_id):
+    bill = get_object_or_404(FixedBill, pk=bill_id)
+    c = bill.cycle
+    form = FixedBillForm(request.POST, instance=bill, cycle=c)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Fixed bill updated.")
+        return redirect('fixed_bill_list')
+    return render(
+        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, bill, True)
+    )
+
+
+@login_required
+def bill_delete(request, bill_id):
+    bill = get_object_or_404(FixedBill, pk=bill_id)
+    if request.method == 'POST':
+        label = bill.get_bill_type_display()
+        amount = bill.amount
+        bill.delete()
+        messages.success(request, f"Deleted {label} bill of \u20b9{amount}.")
+    return redirect('fixed_bill_list')

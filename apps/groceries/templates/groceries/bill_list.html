@@ -1,0 +1,345 @@
+{% extends 'base_manager.html' %}
+{% block title %}Groceries — Mess Manager{% endblock %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --color-bg: #F7F8FA;
+        --color-surface: #FFFFFF;
+        --color-border: #E2E5E9;
+        --color-text-primary: #1F2430;
+        --color-text-muted: #6B7280;
+        --color-primary: #2E6F5E;
+        --color-primary-hover: #255A4C;
+        --color-accent: #C97B2E;
+        --color-danger: #B3413B;
+        --color-success: #3E8E5A;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 16px;
+        font-family: inherit;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(46,111,94,0.15);
+    }
+    label { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .form-row > .form-group { flex: 1; min-width: 200px; }
+    .btn-primary {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 10px 16px; font-size: 16px; font-weight: 600; font-family: inherit;
+        border: none; border-radius: 6px; cursor: pointer;
+        background: var(--color-primary); color: #fff; transition: background-color 0.15s;
+    }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-text {
+        background: none; border: none; color: var(--color-primary);
+        font-size: 13px; font-weight: 600; cursor: pointer; padding: 2px 6px;
+    }
+    .btn-text:hover { text-decoration: underline; }
+    .btn-ghost {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 8px 12px; font-size: 13px; font-weight: 600; font-family: inherit;
+        border: 1px solid var(--color-border); border-radius: 6px; cursor: pointer;
+        background: var(--color-surface); color: var(--color-text-primary);
+    }
+    .btn-ghost:hover { background: var(--color-bg); border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-link {
+        background: none; border: none; color: var(--color-primary);
+        font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;
+    }
+    .btn-link:hover { text-decoration: underline; }
+    .toggle-check { margin-right: 6px; }
+    .hidden { display: none; }
+    .card {
+        background: var(--color-surface); border: 1px solid var(--color-border);
+        border-radius: 8px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .card-title { font-size: 20px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 16px; }
+    .table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .data-table thead th {
+        background: var(--color-bg); padding: 10px 16px; font-size: 12px; font-weight: 600;
+        color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em;
+        text-align: left; border-bottom: 1px solid var(--color-border);
+    }
+    .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover { background: var(--color-bg); }
+    .data-table td.numeric { text-align: right; }
+    .data-table td.center { text-align: center; }
+    .data-table td.actions-cell { white-space: nowrap; }
+    .empty-row { text-align: center; color: var(--color-text-muted); padding: 28px 16px; }
+    .items-detail { background: var(--color-bg); border-top: 1px solid var(--color-border); }
+    .field-error {
+        color: var(--color-danger); font-size: 12px; margin-top: 4px; line-height: 1.3;
+    }
+    .field-error ul { list-style: none; padding-left: 0; margin: 0; }
+    .toggle-handle { cursor: pointer; color: var(--color-primary); font-size: 12px; font-weight: 600; }
+    .toggle-handle:hover { text-decoration: underline; }
+    .items-sub-table td { padding: 6px 8px; font-size: 13px; }
+    .page-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .page-title-row h1 { font-size: 28px; font-weight: 700; color: var(--color-text-primary); }
+    .tab-nav { display: inline-flex; gap: 4px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 6px; padding: 2px; }
+    .tab-nav a {
+        padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 4px;
+        color: var(--color-text-muted); text-decoration: none; cursor: pointer;
+    }
+    .tab-nav a.active { background: var(--color-primary); color: #fff; }
+    .tab-nav a:hover:not(.active) { background: var(--color-surface); }
+    .notice {
+        border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px;
+    }
+    .notice-ok { background: rgba(62,142,90,0.08); border: 1px solid rgba(62,142,90,0.25); color: var(--color-success); }
+    .notice-warn { background: rgba(201,123,46,0.08); border: 1px solid rgba(201,123,46,0.25); color: var(--color-text-muted); }
+    .hint { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title-row">
+    <h1>Groceries</h1>
+    <nav class="tab-nav">
+        <a href="{% url 'bill_list' %}" class="active">Grocery Bills</a>
+        <a href="{% url 'extra_list' %}">Extra Grocery</a>
+    </nav>
+</div>
+
+{% if not has_cycle %}
+    <div class="notice notice-warn">
+        No open cycle. Open one in the Cycles admin before logging groceries.
+    </div>
+{% endif %}
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="notice notice-warn">{{ message }}</div>
+        {% else %}
+            <div class="notice notice-ok">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<div class="card" {% if not has_cycle %}style="opacity:0.6;pointer-events:none;"{% endif %}>
+    <div class="card-title">{{ editing_bill|yesno:"Edit Grocery Bill,Add Grocery Bill" }}</div>
+
+    {% if editing_bill %}
+        {% url 'bill_update' editing_bill.id as form_action %}
+    {% else %}
+        {% url 'bill_add' as form_action %}
+    {% endif %}
+    <form method="post" action="{{ form_action }}" id="bill-form">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ bill_form.bill_date.id_for_label }}">Bill Date</label>
+                {{ bill_form.bill_date }}
+                {% if bill_form.bill_date.errors %}<div class="field-error">{{ bill_form.bill_date.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ bill_form.total_amount.id_for_label }}">Total Amount</label>
+                {{ bill_form.total_amount }}
+                <div class="hint">Always required and authoritative, even with line items.</div>
+                {% if bill_form.total_amount.errors %}<div class="field-error">{{ bill_form.total_amount.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ bill_form.purchased_by.id_for_label }}">Purchased By</label>
+            {{ bill_form.purchased_by }}
+            {% if bill_form.purchased_by.errors %}<div class="field-error">{{ bill_form.purchased_by.errors }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ bill_form.note.id_for_label }}">Note</label>
+            {{ bill_form.note }}
+            {% if bill_form.note.errors %}<div class="field-error">{{ bill_form.note.errors }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="toggle-items" class="toggle-check">
+                Add itemized breakdown
+            </label>
+            <div class="hint">Item line totals do not need to equal Total Amount.</div>
+        </div>
+
+        <div id="items-section" class="hidden">
+            <table class="data-table items-sub-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th class="numeric">Line Total</th>
+                        <th class="center">—</th>
+                    </tr>
+                </thead>
+                <tbody id="items-body">
+                    {% if editing_bill %}
+                        {% for item in editing_bill.items.all %}
+                        <tr class="item-row">
+                            <td><input name="item_name" type="text" value="{{ item.item_name }}" class="form-input" style="padding:6px 8px;font-size:13px;"></td>
+                            <td><input name="quantity" type="number" step="0.001" value="{{ item.quantity }}" class="form-input" style="padding:6px 8px;font-size:13px;text-align:right;"></td>
+                            <td><input name="unit_price" type="number" step="0.01" value="{{ item.unit_price }}" class="form-input" style="padding:6px 8px;font-size:13px;text-align:right;"></td>
+                            <td class="numeric line-total-cell">₹{{ item.line_total }}</td>
+                            <td class="center"><button type="button" class="remove-row" style="color:var(--color-danger);font-size:16px;line-height:1;">✕</button></td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+            <template id="item-row-template">
+                <tr class="item-row">
+                    <td><input name="item_name" type="text" class="form-input" style="padding:6px 8px;font-size:13px;"></td>
+                    <td><input name="quantity" type="number" step="0.001" value="1" class="form-input" style="padding:6px 8px;font-size:13px;text-align:right;"></td>
+                    <td><input name="unit_price" type="number" step="0.01" class="form-input" style="padding:6px 8px;font-size:13px;text-align:right;"></td>
+                    <td class="numeric line-total-cell">—</td>
+                    <td class="center"><button type="button" class="remove-row" style="color:var(--color-danger);font-size:16px;line-height:1;">✕</button></td>
+                </tr>
+            </template>
+            <button type="button" id="add-item-row" class="btn-link">+ Add item</button>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:12px;">
+            <button type="submit" class="btn-primary">Save Bill</button>
+            {% if editing_bill %}
+                <a href="{% url 'bill_list' %}" class="btn-ghost">Cancel</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Purchased By</th>
+                <th class="numeric">Total Amount</th>
+                <th>Items</th>
+                <th class="actions-cell">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bill in bills %}
+            <tr>
+                <td>{{ bill.bill_date|date:"M j, Y" }}</td>
+                <td>{{ bill.purchased_by.name }}</td>
+                <td class="numeric">₹{{ bill.total_amount }}</td>
+                <td>
+                    {% if bill.items.exists %}
+                        <span class="toggle-handle" onclick="toggleBillItems(this, {{ bill.id }})">Show ({{ bill.items.count }})</span>
+                        <div id="bill-items-{{ bill.id }}" class="items-detail hidden">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="numeric">Qty</th>
+                                        <th class="numeric">Unit Price</th>
+                                        <th class="numeric">Line Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in bill.items.all %}
+                                    <tr>
+                                        <td>{{ item.item_name }}</td>
+                                        <td class="numeric">{{ item.quantity }}</td>
+                                        <td class="numeric">₹{{ item.unit_price }}</td>
+                                        <td class="numeric">₹{{ item.line_total }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <span style="color:var(--color-text-muted);">—</span>
+                    {% endif %}
+                </td>
+                <td class="actions-cell">
+                    <a href="{% url 'bill_edit' bill.id %}" class="btn-text">Edit</a>
+                    <form method="post" action="{% url 'bill_delete' bill.id %}" style="display:inline;" onsubmit="return confirm('Delete this grocery bill?');">{% csrf_token %}<button type="submit" class="btn-link" style="color:var(--color-danger);">Delete</button></form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty-row">No grocery bills yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var toggle = document.getElementById('toggle-items');
+    var section = document.getElementById('items-section');
+    if (toggle && section) {
+        if (section.querySelector('#items-body .item-row')) {
+            section.classList.remove('hidden');
+            toggle.checked = true;
+        }
+        toggle.addEventListener('change', function() {
+            section.classList.toggle('hidden', !this.checked);
+        });
+    }
+
+    var addBtn = document.getElementById('add-item-row');
+    var itemTpl = document.getElementById('item-row-template');
+    if (addBtn && itemTpl) addBtn.addEventListener('click', function() {
+        var body = document.getElementById('items-body');
+        var clone = itemTpl.content.querySelector('.item-row').cloneNode(true);
+        body.appendChild(clone);
+    });
+
+    var itemsBody = document.getElementById('items-body');
+    if (itemsBody) {
+        itemsBody.addEventListener('click', function(e) {
+            var btn = e.target.closest('.remove-row');
+            if (!btn) return;
+            var row = btn.closest('tr');
+            var rows = itemsBody.querySelectorAll('.item-row');
+            if (rows.length > 1) {
+                row.remove();
+            } else {
+                row.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+                row.querySelector('.line-total-cell').textContent = '—';
+            }
+        });
+        itemsBody.addEventListener('input', function(e) {
+            var input = e.target;
+            if (input.tagName !== 'INPUT' || input.name !== 'quantity' && input.name !== 'unit_price') return;
+            var row = input.closest('tr');
+            updateRowTotal(row);
+        });
+    }
+
+    function updateRowTotal(row) {
+        var inputs = row.querySelectorAll('input');
+        var qty = parseFloat(inputs[1].value) || 0;
+        var price = parseFloat(inputs[2].value) || 0;
+        var cell = row.querySelector('.line-total-cell');
+        var total = qty * price;
+        cell.textContent = total > 0 ? '₹' + total.toFixed(2) : '—';
+    }
+
+    window.toggleBillItems = function(label, id) {
+        var el = document.getElementById('bill-items-' + id);
+        if (!el) return;
+        el.classList.toggle('hidden');
+        label.textContent = el.classList.contains('hidden') ? 'Show items' : 'Hide';
+    };
+})();
+</script>
+{% endblock %}

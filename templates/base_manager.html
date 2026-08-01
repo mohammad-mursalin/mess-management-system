@@ -222,7 +222,7 @@
             <ul class="sidebar-nav">
                 <li><a href="{% url 'entry_grid' %}" class="{% if request.resolver_match.url_name == 'entry_grid' %}active{% endif %}">Meal Entry</a></li>
                 <li><a href="/admin/members/member/">Members</a></li>
-                <li><a href="/admin/">Groceries</a></li>
+                <li><a href="{% url 'bill_list' %}" class="{% if request.resolver_match.url_name == 'bill_list' or request.resolver_match.url_name == 'extra_list' or request.resolver_match.url_name == 'bill_add' or request.resolver_match.url_name == 'bill_edit' %}active{% endif %}">Groceries</a></li>
                 <li><a href="/admin/">Bills</a></li>
                 <li><a href="/admin/cycles/">Month Summary</a></li>
             </ul>
@@ -244,4 +244,5 @@
         </main>
     </div>
 </body>
+{% block extra_js %}{% endblock %}
 </html>

@@ -1,0 +1,205 @@
+{% extends 'base_manager.html' %}
+{% block title %}Extra Grocery — Mess Manager{% endblock %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --color-bg: #F7F8FA;
+        --color-surface: #FFFFFF;
+        --color-border: #E2E5E9;
+        --color-text-primary: #1F2430;
+        --color-text-muted: #6B7280;
+        --color-primary: #2E6F5E;
+        --color-primary-hover: #255A4C;
+        --color-accent: #C97B2E;
+        --color-danger: #B3413B;
+        --color-success: #3E8E5A;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 16px;
+        font-family: inherit;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(46,111,94,0.15);
+    }
+    label { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .form-row > .form-group { flex: 1; min-width: 180px; }
+    .btn-primary {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 10px 16px; font-size: 16px; font-weight: 600; font-family: inherit;
+        border: none; border-radius: 6px; cursor: pointer;
+        background: var(--color-primary); color: #fff; transition: background-color 0.15s;
+    }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-ghost {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 8px 12px; font-size: 13px; font-weight: 600; font-family: inherit;
+        border: 1px solid var(--color-border); border-radius: 6px; cursor: pointer;
+        background: var(--color-surface); color: var(--color-text-primary);
+    }
+    .btn-ghost:hover { background: var(--color-bg); border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-link {
+        background: none; border: none; color: var(--color-primary);
+        font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;
+    }
+    .btn-link:hover { text-decoration: underline; }
+    .hidden { display: none; }
+    .card {
+        background: var(--color-surface); border: 1px solid var(--color-border);
+        border-radius: 8px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .card-title { font-size: 20px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 16px; }
+    .table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .data-table thead th {
+        background: var(--color-bg); padding: 10px 16px; font-size: 12px; font-weight: 600;
+        color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em;
+        text-align: left; border-bottom: 1px solid var(--color-border);
+    }
+    .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover { background: var(--color-bg); }
+    .data-table td.numeric { text-align: right; }
+    .data-table td.center { text-align: center; }
+    .data-table td.actions-cell { white-space: nowrap; }
+    .empty-row { text-align: center; color: var(--color-text-muted); padding: 28px 16px; }
+    .field-error { color: var(--color-danger); font-size: 12px; margin-top: 4px; }
+    .field-error ul { list-style: none; padding-left: 0; margin: 0; }
+    .page-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .page-title-row h1 { font-size: 28px; font-weight: 700; color: var(--color-text-primary); }
+    .tab-nav { display: inline-flex; gap: 4px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 6px; padding: 2px; }
+    .tab-nav a {
+        padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 4px;
+        color: var(--color-text-muted); text-decoration: none; cursor: pointer;
+    }
+    .tab-nav a.active { background: var(--color-primary); color: #fff; }
+    .tab-nav a:hover:not(.active) { background: var(--color-surface); }
+    .notice {
+        border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px;
+    }
+    .notice-ok { background: rgba(62,142,90,0.08); border: 1px solid rgba(62,142,90,0.25); color: var(--color-success); }
+    .notice-warn { background: rgba(201,123,46,0.08); border: 1px solid rgba(201,123,46,0.25); color: var(--color-text-muted); }
+    .hint { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title-row">
+    <h1>Groceries</h1>
+    <nav class="tab-nav">
+        <a href="{% url 'bill_list' %}">Grocery Bills</a>
+        <a href="{% url 'extra_list' %}" class="active">Extra Grocery</a>
+    </nav>
+</div>
+
+{% if not has_cycle %}
+    <div class="notice notice-warn">
+        No open cycle. Open one in the Cycles admin before logging extras.
+    </div>
+{% endif %}
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="notice notice-warn">{{ message }}</div>
+        {% else %}
+            <div class="notice notice-ok">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<div class="card" {% if not has_cycle %}style="opacity:0.6;pointer-events:none;"{% endif %}>
+    <div class="card-title">{{ editing_extra|yesno:"Edit Extra Grocery,Add Extra Grocery" }}</div>
+
+    {% if editing_extra %}
+        {% url 'extra_update' editing_extra.id as form_action %}
+    {% else %}
+        {% url 'extra_add' as form_action %}
+    {% endif %}
+    <form method="post" action="{{ form_action }}" id="extra-form">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ extra_form.product_name.id_for_label }}">Product</label>
+                {{ extra_form.product_name }}
+                {% if extra_form.product_name.errors %}<div class="field-error">{{ extra_form.product_name.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ extra_form.purchase_date.id_for_label }}">Date</label>
+                {{ extra_form.purchase_date }}
+                {% if extra_form.purchase_date.errors %}<div class="field-error">{{ extra_form.purchase_date.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ extra_form.quantity.id_for_label }}">Quantity</label>
+                {{ extra_form.quantity }}
+                {% if extra_form.quantity.errors %}<div class="field-error">{{ extra_form.quantity.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ extra_form.price.id_for_label }}">Price</label>
+                {{ extra_form.price }}
+                {% if extra_form.price.errors %}<div class="field-error">{{ extra_form.price.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ extra_form.purchased_by.id_for_label }}">Purchased By</label>
+                {{ extra_form.purchased_by }}
+                {% if extra_form.purchased_by.errors %}<div class="field-error">{{ extra_form.purchased_by.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:12px;">
+            <button type="submit" class="btn-primary">Save Extra Grocery</button>
+            {% if editing_extra %}
+                <a href="{% url 'extra_list' %}" class="btn-ghost">Cancel</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Product</th>
+                <th class="numeric">Quantity</th>
+                <th class="numeric">Price</th>
+                <th class="numeric">Line Total</th>
+                <th>Purchased By</th>
+                <th class="actions-cell">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for extra in extras %}
+            <tr>
+                <td>{{ extra.purchase_date|date:"M j, Y" }}</td>
+                <td>{{ extra.product_name }}</td>
+                <td class="numeric">{{ extra.quantity }}</td>
+                <td class="numeric">₹{{ extra.price }}</td>
+                <td class="numeric">₹{{ extra.line_total }}</td>
+                <td>{{ extra.purchased_by.name }}</td>
+                <td class="actions-cell">
+                    <a href="{% url 'extra_edit' extra.id %}" class="btn-link">Edit</a>
+                    <form method="post" action="{% url 'extra_delete' extra.id %}" style="display:inline;" onsubmit="return confirm('Delete this extra grocery entry?');">{% csrf_token %}<button type="submit" class="btn-link" style="color:var(--color-danger);">Delete</button></form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="empty-row">No extra grocery entries yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

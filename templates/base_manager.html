@@ -1,227 +1,50 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mess Manager{% endblock %}</title>
-    <meta name="csrf-token" content="">
-  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-  <script>
-    function getCookie(name) {
-      var cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-          var cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-    var csrftoken = getCookie('csrftoken');
-    document.querySelector('meta[name="csrf-token"]').content = csrftoken || '';
-    console.log('[CSRF] Token:', csrftoken ? 'SET (' + csrftoken.substring(0, 10) + '...)' : 'NOT FOUND');
-
-    // Configure HTMX to use the meta tag
-    if (csrftoken) {
-      htmx.config.csrfToken = csrftoken;
-      htmx.config.includeRequestHeaders = {'X-CSRFToken': csrftoken};
-    } else {
-      console.error('[CSRF] No CSRF token found in cookie');
-    }
-  </script>
-  <script>
-    document.addEventListener('htmx:afterSwap', function (evt) {
-      if (evt.detail.requestConfig.headers['HX-Trigger'] === 'update-counts') {
-        var countsHtml = evt.detail.requestConfig.headers['X-Counts-HTML'];
-        if (countsHtml && document.getElementById('counts-summary')) {
-          document.getElementById('counts-summary').innerHTML = countsHtml;
-        }
-      }
-    });
-  </script>
-    <style>
-        :root {
-            --color-bg: #F7F8FA;
-            --color-surface: #FFFFFF;
-            --color-border: #E2E5E9;
-            --color-text-primary: #1F2430;
-            --color-text-muted: #6B7280;
-            --color-primary: #2E6F5E;
-            --color-primary-hover: #255A4C;
-            --color-accent: #C97B2E;
-            --color-danger: #B3413B;
-            --color-success: #3E8E5A;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
-            color: var(--color-text-primary);
-            background-color: var(--color-bg);
-            min-height: 100vh;
-        }
-
-        .app {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 220px;
-            background: var(--color-surface);
-            border-right: 1px solid var(--color-border);
-            padding: 24px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-brand {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--color-primary);
-            padding: 0 20px 16px;
-            border-bottom: 1px solid var(--color-border);
-            margin-bottom: 8px;
-        }
-
-        .sidebar-cycle {
-            font-size: 12px;
-            color: var(--color-text-muted);
-            padding: 0 20px 16px;
-            border-bottom: 1px solid var(--color-border);
-            margin-bottom: 8px;
-        }
-
-        .sidebar-cycle .cycle-label {
-            font-weight: 600;
-            color: var(--color-text-primary);
-        }
-
-        .sidebar-cycle .cycle-status {
-            display: inline-block;
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-left: 4px;
-        }
-
-        .cycle-status-open {
-            background: rgba(62, 142, 90, 0.12);
-            color: var(--color-success);
-        }
-
-        .cycle-status-closed {
-            background: rgba(107, 114, 128, 0.12);
-            color: var(--color-text-muted);
-        }
-
-        .sidebar-nav {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            flex: 1;
-        }
-
-        .sidebar-nav li a {
-            display: block;
-            padding: 10px 20px;
-            color: var(--color-text-primary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 400;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-nav li a:hover {
-            background: var(--color-bg);
-            color: var(--color-primary);
-        }
-
-        .sidebar-nav li a.active {
-            border-left-color: var(--color-primary);
-            color: var(--color-primary);
-            font-weight: 600;
-        }
-
-        .sidebar-footer {
-            padding: 12px 20px;
-            border-top: 1px solid var(--color-border);
-            font-size: 13px;
-        }
-
-        .sidebar-footer .user-name {
-            font-weight: 600;
-            color: var(--color-text-primary);
-        }
-
-        .sidebar-footer a {
-            display: block;
-            color: var(--color-text-muted);
-            text-decoration: none;
-            font-size: 13px;
-            margin-top: 4px;
-        }
-
-        .sidebar-footer a:hover {
-            color: var(--color-danger);
-        }
-
-        .main {
-            flex: 1;
-            margin-left: 220px;
-            padding: 32px;
-            max-width: 1100px;
-        }
-
-        @media (max-width: 767px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                align-items: center;
-                padding: 12px 16px;
-                gap: 8px;
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
             }
-            .sidebar-brand { border-bottom: none; padding: 0; margin: 0; }
-            .sidebar-cycle { border-bottom: none; padding: 0; margin: 0; }
-            .sidebar-nav { display: flex; gap: 4px; flex-wrap: wrap; }
-            .sidebar-nav li a { padding: 6px 10px; border-left: none; border-radius: 4px; font-size: 13px; }
-            .sidebar-footer { border-top: none; padding: 0; margin-left: auto; }
-            .main { margin-left: 0; padding: 16px; }
+            return cookieValue;
         }
-    </style>
+        var csrftoken = getCookie('csrftoken');
+
+        if (csrftoken) {
+            htmx.config.csrfToken = csrftoken;
+        }
+    </script>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <div class="app">
         <aside class="sidebar">
-            <div class="sidebar-brand">🍚 Mess Manager</div>
+            <div class="sidebar-brand">Mess Manager</div>
             {% if current_cycle %}
             <div class="sidebar-cycle">
                 <span class="cycle-label">{{ current_cycle.label }}</span>
-                <span class="cycle-status cycle-status-{{ current_cycle.status }}">
+                <span class="badge badge-{{ current_cycle.status }}">
                     {{ current_cycle.status }}
                 </span>
             </div>
             {% endif %}
             <ul class="sidebar-nav">
                 <li><a href="{% url 'entry_grid' %}" class="{% if request.resolver_match.url_name == 'entry_grid' %}active{% endif %}">Meal Entry</a></li>
-                <li><a href="/admin/members/member/">Members</a></li>
+                <li><a href="{% url 'member_list' %}" class="{% if 'member' in request.resolver_match.url_name %}active{% endif %}">Members</a></li>
                 <li><a href="{% url 'bill_list' %}" class="{% if request.resolver_match.url_name == 'bill_list' or request.resolver_match.url_name == 'extra_list' or request.resolver_match.url_name == 'bill_add' or request.resolver_match.url_name == 'bill_edit' or request.resolver_match.url_name == 'extra_add' or request.resolver_match.url_name == 'extra_edit' %}active{% endif %}">Groceries</a></li>
                 <li><a href="{% url 'fixed_bill_list' %}" class="{% if 'fixed_bill' in request.resolver_match.url_name %}active{% endif %}">Bills</a></li>
                 <li><a href="{% url 'month_summary' %}" class="{% if request.resolver_match.url_name == 'month_summary' %}active{% endif %}">Month Summary</a></li>
@@ -231,13 +54,10 @@
                 <a href="{% url 'logout' %}">Log out</a>
             </div>
         </aside>
-    <main class="main">
-        {% csrf_token %}
-        {% if messages %}
+        <main class="main">
+            {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}" style="padding:10px 16px;border-radius:6px;margin-bottom:16px;font-size:14px;border:1px solid;">
-                        {{ message }}
-                    </div>
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
             {% block content %}{% endblock %}

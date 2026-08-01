@@ -2,16 +2,20 @@
 Django project configuration.
 """
 
-from pathlib import Path
 import os
-from decouple import config
+from pathlib import Path
+import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = config('DEBUG', default=True, cast=bool)
+env = environ.Env(
+    DEBUG=(bool, True)
+)
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-development-key-change-in-production')
+DEBUG = env('DEBUG')
+
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-development-key-change-in-production')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -65,25 +69,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('POSTGRES_DB', default='mess_manager'),
-            'USER': config('POSTGRES_USER', default='mess_admin'),
-            'PASSWORD': config('POSTGRES_PASSWORD', default='choose-a-local-password'),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='5432'),
-        }
-    }
+# Database — read DATABASE_URL from env (neon/postgres in prod, sqlite locally)
+DATABASES = {
+    'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+}
 
 
 # Password validation
@@ -105,6 +94,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # WhiteNoise configuration for static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

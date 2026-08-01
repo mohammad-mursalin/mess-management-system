@@ -1,0 +1,238 @@
+{% extends 'base_manager.html' %}
+{% block title %}Month Summary{% endblock %}
+
+{% block extra_head %}
+<style>
+    .summary-banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        margin-bottom: 32px;
+        background: rgba(201, 123, 46, 0.12);
+        border: 1px solid rgba(201, 123, 46, 0.3);
+        border-radius: 8px;
+        font-size: 14px;
+        color: var(--color-accent);
+        font-weight: 600;
+    }
+
+    .summary-banner .icon {
+        font-size: 20px;
+        opacity: 0.7;
+    }
+
+    .summary-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .summary-header h1 {
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+
+    .summary-header .cycle-label {
+        font-size: 14px;
+        color: var(--color-text-muted);
+    }
+
+    .summary-header .cycle-label .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 6px;
+    }
+
+    .badge-open {
+        background: rgba(62, 142, 90, 0.12);
+        color: var(--color-success);
+    }
+
+    .badge-closed {
+        background: rgba(107, 114, 128, 0.12);
+        color: var(--color-text-muted);
+    }
+
+    .totals-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    @media (min-width: 768px) {
+        .totals-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    .total-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .total-card .total-label {
+        font-size: 12px;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .total-card .total-amount {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--color-text-primary);
+    }
+
+    .meals-section {
+        margin-top: 32px;
+    }
+
+    .meals-section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 16px;
+    }
+
+    .meals-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .meals-table th {
+        background: var(--color-surface);
+        color: var(--color-text-muted);
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .meals-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--color-border);
+        text-align: left;
+    }
+
+    .meals-table td.numeric {
+        text-align: right;
+    }
+
+    .meals-table tbody tr:hover {
+        background: var(--color-bg);
+    }
+
+    .meals-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .meals-table tfoot td {
+        font-weight: 700;
+        color: var(--color-text-primary);
+        background: var(--color-bg);
+    }
+
+    .no-cycle {
+        padding: 48px 16px;
+        text-align: center;
+        color: var(--color-text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    {% if current_cycle %}
+    <div class="summary-header">
+        <h1>Month Summary</h1>
+        <span class="cycle-label">
+            {{ current_cycle.label }}
+            <span class="badge badge-{{ current_cycle.status }}">
+                {{ current_cycle.status }}
+            </span>
+        </span>
+    </div>
+
+    <div class="summary-banner">
+        <span class="icon">&#9888;</span>
+        Due/refund calculation not yet configured.
+    </div>
+
+    <section class="totals-grid">
+        <div class="total-card">
+            <div class="total-label">Total Grocery Spend</div>
+            <div class="total-amount">₹{{ total_grocery }}</div>
+        </div>
+        <div class="total-card">
+            <div class="total-label">Total Extra Grocery Spend</div>
+            <div class="total-amount">₹{{ total_extra_grocery }}</div>
+        </div>
+        <div class="total-card">
+            <div class="total-label">Total Fixed Bills</div>
+            <div class="total-amount">₹{{ total_fixed_bills }}</div>
+        </div>
+        <div class="total-card">
+            <div class="total-label">Total Meals Eaten</div>
+            <div class="total-amount">{{ total_meals }}</div>
+        </div>
+    </section>
+
+    <section class="meals-section">
+        <h2>Meals Eaten Per Member</h2>
+        <table class="meals-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="numeric">Breakfast</th>
+                    <th class="numeric">Lunch</th>
+                    <th class="numeric">Dinner</th>
+                    <th class="numeric">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in member_meals %}
+                <tr>
+                    <td>{{ m.name }}</td>
+                    <td class="numeric">{{ m.breakfast }}</td>
+                    <td class="numeric">{{ m.lunch }}</td>
+                    <td class="numeric">{{ m.dinner }}</td>
+                    <td class="numeric">{{ m.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center;padding:24px;color:var(--color-text-muted);">
+                        No members in the current cycle.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% else %}
+    <div class="no-cycle">
+        <p style="font-size:18px;margin-bottom:8px;">No open cycle found.</p>
+        <p style="font-size:14px;color:var(--color-text-muted);">Open a cycle in the Cycles admin to view the month summary.</p>
+    </div>
+    {% endif %}
+{% endblock %}

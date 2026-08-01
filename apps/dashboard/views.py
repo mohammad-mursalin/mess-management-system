@@ -1,8 +1,13 @@
+from decimal import Decimal
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import F, Sum
 from django.shortcuts import render
 from django.utils import timezone
-from django.db.models import Sum
 
 from cycles.models import Cycle
+from groceries.models import GroceryBill, ExtraGrocery
+from bills.models import FixedBill
 from meals.selectors import get_daily_counts
 
 
@@ -54,4 +59,64 @@ def home(request):
         'today': today,
         'last_updated': last_updated,
         'members': members,
+    })
+
+
+@login_required
+def month_summary(request):
+    cycle = Cycle.objects.filter(status='open').first()
+
+    total_grocery = Decimal('0')
+    total_extra_grocery = Decimal('0')
+    total_fixed_bills = Decimal('0')
+    total_meals = 0.0
+    member_meals = []
+
+    if cycle:
+        grocery_agg = GroceryBill.objects.filter(cycle=cycle).aggregate(
+            total=Sum('total_amount')
+        )
+        total_grocery = grocery_agg['total'] or Decimal('0')
+
+        extra_agg = ExtraGrocery.objects.filter(cycle=cycle).aggregate(
+            total=Sum(F('quantity') * F('price'))
+        )
+        total_extra_grocery = extra_agg['total'] or Decimal('0')
+
+        fixed_agg = FixedBill.objects.filter(cycle=cycle).aggregate(
+            total=Sum('amount')
+        )
+        total_fixed_bills = fixed_agg['total'] or Decimal('0')
+
+        end_date = cycle.end_date or timezone.now().date()
+
+        for mc in cycle.member_cycles.select_related('member'):
+            meals = mc.meal_entries.filter(
+                entry_date__gte=cycle.start_date,
+                entry_date__lte=end_date,
+            )
+            agg = meals.aggregate(
+                bf=Sum('breakfast'),
+                ln=Sum('lunch'),
+                dn=Sum('dinner'),
+            )
+            bf = float(agg['bf'] or 0)
+            ln = int(agg['ln'] or 0)
+            dn = int(agg['dn'] or 0)
+            member_meals.append({
+                'name': mc.member.name,
+                'breakfast': bf,
+                'lunch': ln,
+                'dinner': dn,
+                'total': round(bf + ln + dn, 1),
+            })
+            total_meals += round(bf + ln + dn, 1)
+
+    return render(request, 'dashboard/month_summary.html', {
+        'current_cycle': cycle,
+        'total_grocery': total_grocery,
+        'total_extra_grocery': total_extra_grocery,
+        'total_fixed_bills': total_fixed_bills,
+        'total_meals': total_meals,
+        'member_meals': member_meals,
     })

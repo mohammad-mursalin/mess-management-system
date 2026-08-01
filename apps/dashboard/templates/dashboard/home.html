@@ -9,35 +9,11 @@
         margin-bottom: 24px;
     }
 
-    /* Today's meal count cards */
+    /* Today's meal counts — flex, stack under 480px */
     .today-counts {
         display: flex;
         gap: 16px;
         margin-bottom: 32px;
-    }
-
-    .count-card {
-        flex: 1;
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    }
-
-    .count-card .meal-label {
-        font-size: 12px;
-        color: var(--color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-    }
-
-    .count-card .meal-count {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--color-text-primary);
     }
 
     @media (max-width: 480px) {
@@ -46,30 +22,11 @@
         }
     }
 
-    /* Members table */
-    .members-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    }
-
-    .members-table th {
-        background: var(--color-surface);
-        color: var(--color-text-muted);
-        font-weight: 600;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 12px 16px;
-        text-align: left;
+    /* Sortable table headers */
+    .members-table th.sortable {
         cursor: pointer;
         user-select: none;
-        border-bottom: 1px solid var(--color-border);
+        padding: 12px 16px;
     }
 
     .members-table th.sortable:hover {
@@ -78,42 +35,14 @@
 
     .members-table th .sort-indicator {
         margin-left: 4px;
-        font-size: 11px;
+        font-size: 12px;
         opacity: 0.4;
     }
 
-    .members-table th.sort-asc .sort-indicator.asc {
-        opacity: 1;
-        color: var(--color-primary);
-    }
-
-    .members-table th.sort-desc .sort-indicator.asc {
-        opacity: 1;
-        color: var(--color-primary);
-    }
-
-    .members-table th.sort-asc .sort-indicator.desc,
+    .members-table th.sort-asc .sort-indicator.asc,
     .members-table th.sort-desc .sort-indicator.desc {
         opacity: 1;
         color: var(--color-primary);
-    }
-
-    .members-table td {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--color-border);
-        text-align: left;
-    }
-
-    .members-table tbody tr:hover {
-        background: var(--color-bg);
-    }
-
-    .members-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .members-table td.numeric {
-        text-align: right;
     }
 </style>
 {% endblock %}
@@ -125,21 +54,21 @@
 
     <section class="today-counts">
         <div class="count-card">
-            <div class="meal-label">Breakfast</div>
-            <div class="meal-count">{{ today_counts.breakfast_count }}</div>
+            <span class="count-label">Breakfast</span>
+            <span class="count-value">{{ today_counts.breakfast_count }}</span>
         </div>
         <div class="count-card">
-            <div class="meal-label">Lunch</div>
-            <div class="meal-count">{{ today_counts.lunch_count }}</div>
+            <span class="count-label">Lunch</span>
+            <span class="count-value">{{ today_counts.lunch_count }}</span>
         </div>
         <div class="count-card">
-            <div class="meal-label">Dinner</div>
-            <div class="meal-count">{{ today_counts.dinner_count }}</div>
+            <span class="count-label">Dinner</span>
+            <span class="count-value">{{ today_counts.dinner_count }}</span>
         </div>
     </section>
 
     <section>
-        <table class="members-table">
+        <table class="data-table members-table">
             <thead>
                 <tr>
                     <th class="sortable" data-col="name">
@@ -174,9 +103,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align:center;padding:24px;color:var(--color-text-muted);">
-                        No members in the current cycle.
-                    </td>
+                    <td colspan="5" class="empty-row">No members in the current cycle.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -185,7 +112,7 @@
 {% endblock %}
 
 {% block footer %}
-Data updated by mess manager. Contact manager for corrections.
+    Data updated by mess manager. Contact manager for corrections.
 {% endblock %}
 
 {% block extra_js %}

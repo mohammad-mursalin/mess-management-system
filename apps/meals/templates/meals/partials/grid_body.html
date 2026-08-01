@@ -19,7 +19,7 @@
                     {% if open_cycle.end_date and next_date > open_cycle.end_date %}disabled{% endif %}>&gt;</button>
             <span class="date-label">{{ selected_date|date:"D, M j, Y" }}</span>
             {% if open_cycle.status == 'closed' %}
-                <span class="cycle-closed-badge">Cycle closed</span>
+                <span class="badge badge-closed">Cycle closed</span>
             {% endif %}
         </form>
     </div>

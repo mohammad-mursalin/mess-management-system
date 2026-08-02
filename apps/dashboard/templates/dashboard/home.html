@@ -1,5 +1,5 @@
 {% extends 'base_public.html' %}
-{% load dashboard_extras %}
+{% load dashboard_extras meal_extras %}
 {% block title %}Mess Dashboard{% endblock %}
 
 {% block extra_head %}
@@ -23,9 +23,9 @@
             <div class="meal-status-row">
                 <span class="meal-status-name">{{ status.name }}</span>
                 <div class="meal-status-indicators">
-                    <span class="meal-status-indicator {% if status.breakfast_on %}on{% else %}off{% endif %}" aria-label="Breakfast: {% if status.breakfast_on %}on{% else %}off{% endif %}">🍳 {% if status.breakfast_on %}On{% else %}Off{% endif %}</span>
-                    <span class="meal-status-indicator {% if status.lunch_on %}on{% else %}off{% endif %}" aria-label="Lunch: {% if status.lunch_on %}on{% else %}off{% endif %}">🍛 {% if status.lunch_on %}On{% else %}Off{% endif %}</span>
-                    <span class="meal-status-indicator {% if status.dinner_on %}on{% else %}off{% endif %}" aria-label="Dinner: {% if status.dinner_on %}on{% else %}off{% endif %}">🌙 {% if status.dinner_on %}On{% else %}Off{% endif %}</span>
+                    <span class="meal-status-indicator {% if status.breakfast > 0 %}on{% else %}off{% endif %}" aria-label="Breakfast: {{ status.breakfast|format_meal_value }}">🍳 {{ status.breakfast|format_meal_value }}</span>
+                    <span class="meal-status-indicator {% if status.lunch > 0 %}on{% else %}off{% endif %}" aria-label="Lunch: {{ status.lunch|format_meal_value }}">🍛 {{ status.lunch|format_meal_value }}</span>
+                    <span class="meal-status-indicator {% if status.dinner > 0 %}on{% else %}off{% endif %}" aria-label="Dinner: {{ status.dinner|format_meal_value }}">🌙 {{ status.dinner|format_meal_value }}</span>
                 </div>
             </div>
             {% empty %}

@@ -56,11 +56,14 @@ def home(request):
             })
 
             today_entry = mc.meal_entries.filter(entry_date=today).first()
+            bf_val = today_entry.breakfast if today_entry else Decimal('0')
+            ln_val = today_entry.lunch if today_entry else Decimal('0')
+            dn_val = today_entry.dinner if today_entry else Decimal('0')
             today_meal_status.append({
                 'name': mc.member.name,
-                'breakfast_on': bool(today_entry and today_entry.breakfast and today_entry.breakfast > 0),
-                'lunch_on': bool(today_entry and today_entry.lunch and today_entry.lunch > 0),
-                'dinner_on': bool(today_entry and today_entry.dinner and today_entry.dinner > 0),
+                'breakfast': bf_val,
+                'lunch': ln_val,
+                'dinner': dn_val,
             })
 
     return render(request, 'dashboard/home.html', {

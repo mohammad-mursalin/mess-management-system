@@ -35,7 +35,7 @@
                     <li><a href="{% url 'member_list' %}" class="{% if 'member' in request.resolver_match.url_name %}active{% endif %}">Members</a></li>
                     <li><a href="{% url 'bill_list' %}" class="{% if request.resolver_match.url_name == 'bill_list' or request.resolver_match.url_name == 'extra_list' or request.resolver_match.url_name == 'bill_add' or request.resolver_match.url_name == 'extra_add' or request.resolver_match.url_name == 'extra_edit' %}active{% endif %}">Groceries</a></li>
                     <li><a href="{% url 'fixed_bill_list' %}" class="{% if 'fixed_bill' in request.resolver_match.url_name %}active{% endif %}">Bills</a></li>
-                    <li><a href="{% url 'month_summary' %}" class="{% if request.resolver_match.url_name == 'month_summary' %}active{% endif %}">Month Summary</a></li>
+                    <li><a href="{% url 'month_summary' %}" class="nav-month-summary {% if request.resolver_match.url_name == 'month_summary' %}active{% endif %}">Month Summary</a></li>
                 </ul>
             </div>
         </aside>

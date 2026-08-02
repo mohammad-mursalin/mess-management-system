@@ -5,17 +5,6 @@ from django.utils import timezone
 
 
 class MealEntry(models.Model):
-    BREAKFAST_CHOICES = [
-        (Decimal('0'), '0'),
-        (Decimal('0.5'), '½'),
-        (Decimal('1'), '1'),
-    ]
-    LUNCH_CHOICES = [
-        (Decimal('0'), '0'),
-        (Decimal('1'), '1'),
-    ]
-    DINNER_CHOICES = LUNCH_CHOICES
-
     member_cycle = models.ForeignKey(
         'members.MemberCycle',
         on_delete=models.CASCADE,
@@ -23,16 +12,16 @@ class MealEntry(models.Model):
     )
     entry_date = models.DateField()
     breakfast = models.DecimalField(
-        max_digits=3, decimal_places=1,
-        choices=BREAKFAST_CHOICES, default=Decimal('0'),
+        max_digits=4, decimal_places=1,
+        default=Decimal('0'),
     )
     lunch = models.DecimalField(
-        max_digits=3, decimal_places=1,
-        choices=LUNCH_CHOICES, default=Decimal('0'),
+        max_digits=4, decimal_places=1,
+        default=Decimal('0'),
     )
     dinner = models.DecimalField(
-        max_digits=3, decimal_places=1,
-        choices=DINNER_CHOICES, default=Decimal('0'),
+        max_digits=4, decimal_places=1,
+        default=Decimal('0'),
     )
     updated_by = models.ForeignKey(
         'auth.User',

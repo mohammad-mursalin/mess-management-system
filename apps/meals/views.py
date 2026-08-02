@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from decimal import Decimal
 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -59,6 +60,31 @@ def entry_grid(request):
             ).first()
             entry_map[mc.id] = entry
 
+    from django.middleware.csrf import get_token
+    csrf_token_val = get_token(request)
+
+    meal_choices_map = {
+        'breakfast': [
+            (Decimal('0'), '0'),
+            (Decimal('0.5'), '½'),
+            (Decimal('1'), '1'),
+        ],
+        'lunch': [
+            (Decimal('0'), '0'),
+            (Decimal('1'), '1'),
+        ],
+        'dinner': [
+            (Decimal('0'), '0'),
+            (Decimal('1'), '1'),
+        ],
+    }
+
+    meal_step_map = {
+        'breakfast': Decimal('0.5'),
+        'lunch': Decimal('1'),
+        'dinner': Decimal('1'),
+    }
+
     return render(request, 'meals/entry_grid.html', {
         'open_cycle': cycle,
         'no_open_cycle': no_open_cycle,
@@ -68,9 +94,88 @@ def entry_grid(request):
         'prev_date': prev_date,
         'next_date': next_date,
         'counts': counts,
-        'BREAKFAST_CHOICES': MealEntry.BREAKFAST_CHOICES,
-        'LUNCH_CHOICES': MealEntry.LUNCH_CHOICES,
-        'DINNER_CHOICES': MealEntry.DINNER_CHOICES,
+        'meal_choices_map': meal_choices_map,
+        'meal_step_map': meal_step_map,
+        'csrf_token_for_htmx': csrf_token_val,
+    })
+
+
+@login_required
+def entry_grid_body(request):
+    cycle = Cycle.objects.filter(status='open').first()
+    today = timezone.now().date()
+
+    no_open_cycle = cycle is None
+
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = today
+    else:
+        selected_date = today
+
+    prev_date = selected_date - timedelta(days=1)
+    next_date = selected_date + timedelta(days=1)
+
+    counts = get_daily_counts(selected_date)
+
+    member_cycles = []
+    entry_map = {}
+
+    if cycle:
+        member_cycles = MemberCycle.objects.filter(
+            cycle=cycle,
+            join_date__lte=selected_date,
+        ).filter(
+            Q(leave_date__isnull=True) | Q(leave_date__gte=selected_date)
+        ).select_related('member')
+
+        for mc in member_cycles:
+            entry = MealEntry.objects.filter(
+                member_cycle=mc,
+                entry_date=selected_date,
+            ).first()
+            entry_map[mc.id] = entry
+
+    from django.middleware.csrf import get_token
+    csrf_token_val = get_token(request)
+
+    meal_choices_map = {
+        'breakfast': [
+            (Decimal('0'), '0'),
+            (Decimal('0.5'), '½'),
+            (Decimal('1'), '1'),
+        ],
+        'lunch': [
+            (Decimal('0'), '0'),
+            (Decimal('1'), '1'),
+        ],
+        'dinner': [
+            (Decimal('0'), '0'),
+            (Decimal('1'), '1'),
+        ],
+    }
+
+    meal_step_map = {
+        'breakfast': Decimal('0.5'),
+        'lunch': Decimal('1'),
+        'dinner': Decimal('1'),
+    }
+
+    return render(request, 'meals/partials/grid_body.html', {
+        'open_cycle': cycle,
+        'no_open_cycle': no_open_cycle,
+        'member_cycles': member_cycles,
+        'entry_map': entry_map,
+        'selected_date': selected_date,
+        'prev_date': prev_date,
+        'next_date': next_date,
+        'counts': counts,
+        'meal_choices_map': meal_choices_map,
+        'meal_step_map': meal_step_map,
+        'csrf_token_for_htmx': csrf_token_val,
     })
 
 
@@ -87,6 +192,9 @@ def meal_cell_update(request):
     if not member_cycle_id or not entry_date_str or not meal_type:
         return HttpResponseBadRequest('Missing parameters')
 
+    from django.middleware.csrf import get_token
+    csrf_token_val = get_token(request)
+
     try:
         mc = MemberCycle.objects.get(pk=member_cycle_id)
     except MemberCycle.DoesNotExist:
@@ -98,18 +206,40 @@ def meal_cell_update(request):
         return HttpResponseBadRequest('Invalid date')
 
     valid_values = {
-        'breakfast': [0, 0.5, 1],
-        'lunch': [0, 1],
-        'dinner': [0, 1],
+        'breakfast': [Decimal('0'), Decimal('0.5'), Decimal('1')],
+        'lunch': [Decimal('0'), Decimal('1')],
+        'dinner': [Decimal('0'), Decimal('1')],
+    }
+
+    meal_step_map = {
+        'breakfast': Decimal('0.5'),
+        'lunch': Decimal('1'),
+        'dinner': Decimal('1'),
+    }
+
+    meal_choices_map = {
+        'breakfast': [
+            (Decimal('0'), '0'),
+            (Decimal('0.5'), '½'),
+            (Decimal('1'), '1'),
+        ],
+        'lunch': [
+            (Decimal('0'), '0'),
+            (Decimal('1'), '1'),
+        ],
+        'dinner': [
+            (Decimal('0'), '0'),
+            (Decimal('1'), '1'),
+        ],
     }
 
     if meal_type not in valid_values:
         return HttpResponseBadRequest('Invalid meal type')
 
     try:
-        value = float(value)
+        value = Decimal(value)
     except (TypeError, ValueError):
-        value = 0
+        value = Decimal('0')
 
     cell_error = None
     entry = None
@@ -121,8 +251,11 @@ def meal_cell_update(request):
             defaults={'member_cycle': mc, 'entry_date': entry_date, 'updated_by': request.user},
         )
 
-        if value not in valid_values[meal_type]:
-            cell_error = 'Invalid meal value.'
+        step = meal_step_map.get(meal_type, Decimal('1'))
+        if value < 0:
+            cell_error = 'Meal value cannot be negative.'
+        elif step > 0 and value % step != 0:
+            cell_error = f'Invalid meal value. Must be a multiple of {step}.'
         elif (mc.join_date and entry_date < mc.join_date) or \
              (mc.leave_date and entry_date > mc.leave_date):
             cell_error = 'Outside member join/leave window.'
@@ -136,17 +269,13 @@ def meal_cell_update(request):
         else:
             cell_error = str(e)
 
-    meal_choices_map = {
-        'breakfast': MealEntry.BREAKFAST_CHOICES,
-        'lunch': MealEntry.LUNCH_CHOICES,
-        'dinner': MealEntry.DINNER_CHOICES,
-    }
-
     return render(request, 'meals/partials/meal_cell.html', {
         'mc': mc,
         'entry': entry,
         'entry_date': entry_date,
         'meal_type': meal_type,
         'meal_choices': meal_choices_map[meal_type],
+        'meal_step': meal_step_map.get(meal_type, Decimal('1')),
         'cell_error': cell_error,
+        'csrf_token_for_htmx': csrf_token_val,
     })

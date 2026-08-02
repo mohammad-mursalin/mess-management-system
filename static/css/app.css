@@ -13,6 +13,7 @@
     --color-accent: #C97B2E;
     --color-danger: #B3413B;
     --color-success: #3E8E5A;
+    --touch-target: 44px;
 }
 
 /* ============================================================
@@ -791,8 +792,8 @@ body {
     cursor: pointer;
     padding: 4px 0;
     text-decoration: none;
-    min-height: 44px;
-    min-width: 44px;
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
 }
 
 .sidebar-logout-btn:hover {
@@ -824,6 +825,9 @@ body {
         display: block;
     }
 
+    :root {
+            --touch-target: 30px;
+        }
     .sidebar {
         position: sticky;
         top: 0;
@@ -892,7 +896,7 @@ body {
         border-radius: 6px;
         font-size: 12px;
         white-space: nowrap;
-        min-height: 44px;
+        min-height: var(--touch-target);
     }
 
     .sidebar-nav li a.nav-month-summary {
@@ -906,7 +910,7 @@ body {
         border-radius: 6px;
         border: 1px solid var(--color-border);
         font-size: 12px;
-        min-height: 44px;
+        min-height: var(--touch-target);
     }
 
     .sidebar-logout-form {
@@ -1015,7 +1019,7 @@ body {
 
     .card-actions .card-btn {
         flex: 1;
-        min-height: 44px;
+        min-height: var(--touch-target);
         padding: 8px 12px;
         font-size: 14px;
         font-weight: 600;
@@ -1063,7 +1067,7 @@ body {
         font-size: 14px;
         font-weight: 600;
         text-decoration: underline;
-        min-height: 44px;
+        min-height: var(--touch-target);
         flex: 1;
         display: flex;
         align-items: center;
@@ -1077,7 +1081,7 @@ body {
         font-size: 14px;
         font-weight: 600;
         text-decoration: underline;
-        min-height: 44px;
+        min-height: var(--touch-target);
         flex: 1;
         display: flex;
         align-items: center;
@@ -1146,10 +1150,10 @@ body {
     }
 
     .date-arrow-mobile {
-        min-width: 44px;
-        min-height: 44px;
-        width: 44px;
-        height: 44px;
+        min-width: var(--touch-target);
+        min-height: var(--touch-target);
+        width: var(--touch-target);
+        height: var(--touch-target);
         padding: 0;
         font-size: 16px;
         font-family: inherit;
@@ -1287,7 +1291,7 @@ button,
 .sidebar-nav li a,
 .sidebar-logout-btn,
 .stepper-btn {
-    min-height: 44px;
+    min-height: var(--touch-target);
 }
 
 /* Action links: make them flex for vertical centering in 44px height */
@@ -1320,7 +1324,7 @@ button,
 .sidebar-nav li a,
 .sidebar-logout-btn,
 .stepper-btn {
-    min-width: 44px;
+    min-width: var(--touch-target);
 }
 
 /* pointer: coarse reinforces the rule on actual touch devices */
@@ -1340,15 +1344,15 @@ button,
     .sidebar-nav li a,
     .sidebar-logout-btn,
     .stepper-btn {
-        min-height: 44px;
-        min-width: 44px;
+        min-height: var(--touch-target);
+        min-width: var(--touch-target);
     }
 }
 
 /* Remove button inside item rows — larger touch area */
 .remove-btn {
-    width: 44px;
-    height: 44px;
+    width: var(--touch-target);
+    height: var(--touch-target);
     font-size: 16px;
 }
 
@@ -1359,7 +1363,7 @@ button,
 
     .tab-nav a {
         flex: 1;
-        min-width: 44px;
+        min-width: var(--touch-target);
     }
 }
 
@@ -1669,7 +1673,7 @@ button,
     color: var(--color-text-muted);
     text-decoration: none;
     cursor: pointer;
-    min-height: 44px;
+    min-height: var(--touch-target);
 }
 
 .tab-nav a.active {
@@ -1708,10 +1712,10 @@ button,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
-    width: 44px;
-    height: 44px;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    width: var(--touch-target);
+    height: var(--touch-target);
     border: 1px solid var(--color-border);
     border-radius: 6px;
     background: var(--color-surface);
@@ -1844,8 +1848,8 @@ button,
 }
 
 .meal-btn {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
     padding: 4px 8px;
     border: 1px solid var(--color-border);
     border-radius: 6px;
@@ -1874,8 +1878,8 @@ button,
 }
 
 .stepper-btn {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
     padding: 4px 8px;
     border: 1px solid var(--color-border);
     border-radius: 6px;
@@ -1901,8 +1905,8 @@ button,
 }
 
 .stepper-value {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1941,13 +1945,13 @@ button,
         align-items: center;
         justify-content: center;
         flex: 1;
-        height: 44px;
+        height: var(--touch-target);
         font-size: 14px;
     }
 
     .stepper-btn {
         flex: 1;
-        height: 44px;
+        height: var(--touch-target);
         font-size: 14px;
     }
 
@@ -2050,8 +2054,8 @@ button,
     line-height: 1;
     cursor: pointer;
     color: var(--color-text-muted);
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
 }
 
 .modal-close:hover {

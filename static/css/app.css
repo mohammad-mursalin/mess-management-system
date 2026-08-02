@@ -1018,6 +1018,9 @@ body {
     .card-btn-danger {
         background: var(--color-danger);
         color: #FFFFFF;
+        border-radius: 10px;
+        /* height: 8px; */
+        padding: 2px;
     }
 
     .card-btn-danger:hover {

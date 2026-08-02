@@ -1,4 +1,5 @@
 {% extends 'base_manager.html' %}
+{% load dashboard_extras %}
 {% block title %}Month Summary{% endblock %}
 
 {% block extra_head %}
@@ -58,10 +59,10 @@
                         {% for m in member_meals %}
                         <tr>
                             <td>{{ m.name }}</td>
-                            <td class="numeric">{{ m.breakfast }}</td>
-                            <td class="numeric">{{ m.lunch }}</td>
-                            <td class="numeric">{{ m.dinner }}</td>
-                            <td class="numeric">{{ m.total }}</td>
+                            <td class="numeric">{{ m.breakfast|format_meal_value }}</td>
+                            <td class="numeric">{{ m.lunch|format_meal_value }}</td>
+                            <td class="numeric">{{ m.dinner|format_meal_value }}</td>
+                            <td class="numeric">{{ m.total|format_meal_value }}</td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -79,19 +80,19 @@
                 <div class="card-primary">{{ m.name }}</div>
                 <div class="card-field">
                     <span class="card-field-label">Breakfast</span>
-                    <span class="card-field-value">{{ m.breakfast }}</span>
+                    <span class="card-field-value">{{ m.breakfast|format_meal_value }}</span>
                 </div>
                 <div class="card-field">
                     <span class="card-field-label">Lunch</span>
-                    <span class="card-field-value">{{ m.lunch }}</span>
+                    <span class="card-field-value">{{ m.lunch|format_meal_value }}</span>
                 </div>
                 <div class="card-field">
                     <span class="card-field-label">Dinner</span>
-                    <span class="card-field-value">{{ m.dinner }}</span>
+                    <span class="card-field-value">{{ m.dinner|format_meal_value }}</span>
                 </div>
                 <div class="card-field">
                     <span class="card-field-label">Total</span>
-                    <span class="card-field-value">{{ m.total }}</span>
+                    <span class="card-field-value">{{ m.total|format_meal_value }}</span>
                 </div>
             </div>
             {% empty %}

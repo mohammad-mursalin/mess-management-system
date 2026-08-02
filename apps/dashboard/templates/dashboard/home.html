@@ -1,4 +1,5 @@
 {% extends 'base_public.html' %}
+{% load dashboard_extras %}
 {% block title %}Mess Dashboard{% endblock %}
 
 {% block extra_head %}
@@ -9,18 +10,29 @@
         Last updated: {{ last_updated|date:"M d, Y \a\t g:i A" }}
     </div>
 
-    <section class="today-counts">
-        <div class="count-card">
-            <span class="count-label">Breakfast</span>
-            <span class="count-value">{{ today_counts.breakfast_count }}</span>
-        </div>
-        <div class="count-card">
-            <span class="count-label">Lunch</span>
-            <span class="count-value">{{ today_counts.lunch_count }}</span>
-        </div>
-        <div class="count-card">
-            <span class="count-label">Dinner</span>
-            <span class="count-value">{{ today_counts.dinner_count }}</span>
+    <section class="today-counts-inline">
+        <span class="count-item"><span class="count-icon" aria-label="Breakfast count: {{ today_counts.breakfast_count }}">🍳</span><span class="count-num">{{ today_counts.breakfast_count }}</span></span>
+        <span class="count-item"><span class="count-icon" aria-label="Lunch count: {{ today_counts.lunch_count }}">🍛</span><span class="count-num">{{ today_counts.lunch_count }}</span></span>
+        <span class="count-item"><span class="count-icon" aria-label="Dinner count: {{ today_counts.dinner_count }}">🌙</span><span class="count-num">{{ today_counts.dinner_count }}</span></span>
+    </section>
+
+    <section class="meal-status-section">
+        <h2>Today's Meal Status — {{ today|date:"M j, Y" }}</h2>
+        <div class="meal-status-list">
+            {% for status in today_meal_status %}
+            <div class="meal-status-row">
+                <span class="meal-status-name">{{ status.name }}</span>
+                <div class="meal-status-indicators">
+                    <span class="meal-status-indicator {% if status.breakfast_on %}on{% else %}off{% endif %}" aria-label="Breakfast: {% if status.breakfast_on %}on{% else %}off{% endif %}">🍳 {% if status.breakfast_on %}On{% else %}Off{% endif %}</span>
+                    <span class="meal-status-indicator {% if status.lunch_on %}on{% else %}off{% endif %}" aria-label="Lunch: {% if status.lunch_on %}on{% else %}off{% endif %}">🍛 {% if status.lunch_on %}On{% else %}Off{% endif %}</span>
+                    <span class="meal-status-indicator {% if status.dinner_on %}on{% else %}off{% endif %}" aria-label="Dinner: {% if status.dinner_on %}on{% else %}off{% endif %}">🌙 {% if status.dinner_on %}On{% else %}Off{% endif %}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="meal-status-row">
+                <span class="meal-status-name" style="color: var(--color-text-muted);">No active members in the current cycle.</span>
+            </div>
+            {% endfor %}
         </div>
     </section>
 
@@ -53,11 +65,11 @@
                         data-breakfast="{{ member.breakfast }}"
                         data-lunch="{{ member.lunch }}"
                         data-dinner="{{ member.dinner }}">
-                        <td>{{ member.name }}</td>
-                        <td class="numeric">৳{{ member.deposit }}</td>
-                        <td class="numeric">{{ member.breakfast }}</td>
-                        <td class="numeric">{{ member.lunch }}</td>
-                        <td class="numeric">{{ member.dinner }}</td>
+                    <td>{{ member.name }}</td>
+                    <td class="numeric">৳{{ member.deposit }}</td>
+                    <td class="numeric">{{ member.breakfast|format_meal_value }}</td>
+                    <td class="numeric">{{ member.lunch|format_meal_value }}</td>
+                    <td class="numeric">{{ member.dinner|format_meal_value }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -82,15 +94,15 @@
                 </div>
                 <div class="card-field">
                     <span class="card-field-label">Breakfast</span>
-                    <span class="card-field-value">{{ member.breakfast }}</span>
+                    <span class="card-field-value">{{ member.breakfast|format_meal_value }}</span>
                 </div>
                 <div class="card-field">
                     <span class="card-field-label">Lunch</span>
-                    <span class="card-field-value">{{ member.lunch }}</span>
+                    <span class="card-field-value">{{ member.lunch|format_meal_value }}</span>
                 </div>
                 <div class="card-field">
                     <span class="card-field-label">Dinner</span>
-                    <span class="card-field-value">{{ member.dinner }}</span>
+                    <span class="card-field-value">{{ member.dinner|format_meal_value }}</span>
                 </div>
             </div>
             {% empty %}

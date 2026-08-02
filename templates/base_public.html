@@ -11,10 +11,10 @@
 <body>
     <div class="public-page">
         <header class="public-header">
-            <span class="mess-name">Mess Manager</span>
-            <span class="header-actions">
-                <a href="{% url 'login' %}" class="btn-ghost" style="padding: 6px 12px; font-size: 14px;">Manager Login</a>
-            </span>
+            <div class="header-top">
+                <span class="mess-name">Mess Manager</span>
+                <a href="{% url 'login' %}" class="btn-ghost header-login-btn">Manager Login</a>
+            </div>
             {% if current_cycle %}
             <span class="cycle-label">
                 {{ current_cycle.label }}

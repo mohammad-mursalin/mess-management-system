@@ -35,6 +35,8 @@ def home(request):
 
         member_cycles = cycle.member_cycles.select_related('member')
 
+        today_meal_status = []
+
         for mc in member_cycles:
             meals = mc.meal_entries.filter(
                 entry_date__gte=start_date,
@@ -53,12 +55,21 @@ def home(request):
                 'dinner': int(agg['dn'] or 0),
             })
 
+            today_entry = mc.meal_entries.filter(entry_date=today).first()
+            today_meal_status.append({
+                'name': mc.member.name,
+                'breakfast_on': bool(today_entry and today_entry.breakfast and today_entry.breakfast > 0),
+                'lunch_on': bool(today_entry and today_entry.lunch and today_entry.lunch > 0),
+                'dinner_on': bool(today_entry and today_entry.dinner and today_entry.dinner > 0),
+            })
+
     return render(request, 'dashboard/home.html', {
         'current_cycle': cycle,
         'today_counts': today_counts,
         'today': today,
         'last_updated': last_updated,
         'members': members,
+        'today_meal_status': today_meal_status,
     })
 
 

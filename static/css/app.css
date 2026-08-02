@@ -1350,6 +1350,33 @@ button,
     margin-bottom: 32px;
 }
 
+.today-counts-inline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 8px 0;
+}
+
+.today-counts-inline .count-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.today-counts-inline .count-icon {
+    font-size: 16px;
+}
+
+.today-counts-inline .count-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
 @media (max-width: 480px) {
     .today-counts {
         flex-direction: column;
@@ -1441,10 +1468,26 @@ button,
 
 
 
+.public-page {
+    padding: 32px;
+}
+
+@media (max-width: 768px) {
+    .public-page {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .public-page {
+        padding: 12px;
+    }
+}
+
 .public-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
     padding: 12px 0;
     border-bottom: 1px solid var(--color-border);
     margin-bottom: 24px;
@@ -1454,6 +1497,19 @@ button,
     font-size: 20px;
     font-weight: 600;
     color: var(--color-primary);
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-login-btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .public-header .cycle-label {
@@ -1478,6 +1534,71 @@ button,
     color: var(--color-text-muted);
     border-top: 1px solid var(--color-border);
     margin-top: 32px;
+}
+
+/* Today's Meal Status (public dashboard) */
+.meal-status-section {
+    margin-bottom: 24px;
+}
+
+.meal-status-section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 12px;
+}
+
+.meal-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meal-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.meal-status-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    min-width: 100px;
+}
+
+.meal-status-indicators {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.meal-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.meal-status-indicator.on {
+    background: var(--color-success);
+    color: #FFFFFF;
+}
+
+.meal-status-indicator.off {
+    background: none;
+    border: 1px solid var(--color-text-muted);
+    color: var(--color-text-muted);
 }
 
 /* Page title row */

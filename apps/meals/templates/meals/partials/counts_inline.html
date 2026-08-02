@@ -1,0 +1,6 @@
+{% load meal_extras %}
+<div class="counts-inline">
+    <span class="count-item"><span class="count-icon" aria-label="Breakfast count: {{ counts.breakfast_count }}">🍳</span><span class="count-num">{{ counts.breakfast_count }}</span></span>
+    <span class="count-item"><span class="count-icon" aria-label="Lunch count: {{ counts.lunch_count }}">🍛</span><span class="count-num">{{ counts.lunch_count }}</span></span>
+    <span class="count-item"><span class="count-icon" aria-label="Dinner count: {{ counts.dinner_count }}">🌙</span><span class="count-num">{{ counts.dinner_count }}</span></span>
+</div>

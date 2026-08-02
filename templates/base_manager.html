@@ -14,28 +14,29 @@
 <body>
     <div class="app">
         <aside class="sidebar">
-            <div class="sidebar-brand">Mess Manager</div>
-            {% if current_cycle %}
-            <div class="sidebar-cycle">
-                <span class="cycle-label">{{ current_cycle.label }}</span>
-                <span class="badge badge-{{ current_cycle.status }}">
-                    {{ current_cycle.status }}
-                </span>
-            </div>
-            {% endif %}
-            <ul class="sidebar-nav">
-                <li><a href="{% url 'entry_grid' %}" class="{% if request.resolver_match.url_name == 'entry_grid' %}active{% endif %}">Meal Entry</a></li>
-                <li><a href="{% url 'member_list' %}" class="{% if 'member' in request.resolver_match.url_name %}active{% endif %}">Members</a></li>
-                <li><a href="{% url 'bill_list' %}" class="{% if request.resolver_match.url_name == 'bill_list' or request.resolver_match.url_name == 'extra_list' or request.resolver_match.url_name == 'bill_add' or request.resolver_match.url_name == 'bill_edit' or request.resolver_match.url_name == 'extra_add' or request.resolver_match.url_name == 'extra_edit' %}active{% endif %}">Groceries</a></li>
-                <li><a href="{% url 'fixed_bill_list' %}" class="{% if 'fixed_bill' in request.resolver_match.url_name %}active{% endif %}">Bills</a></li>
-                <li><a href="{% url 'month_summary' %}" class="{% if request.resolver_match.url_name == 'month_summary' %}active{% endif %}">Month Summary</a></li>
-            </ul>
-            <div class="sidebar-footer">
-                <span class="user-name">{{ request.user.username }}</span>
+            <div class="sidebar-header">
+                <div class="sidebar-brand">Mess Manager</div>
+                {% if current_cycle %}
+                <div class="sidebar-cycle">
+                    <span class="cycle-label">{{ current_cycle.label }}</span>
+                    <span class="badge badge-{{ current_cycle.status }}">
+                        {{ current_cycle.status }}
+                    </span>
+                </div>
+                {% endif %}
                 <form method="post" action="{% url 'logout' %}" class="sidebar-logout-form">
                     {% csrf_token %}
                     <button type="submit" class="sidebar-logout-btn">Log out</button>
                 </form>
+            </div>
+            <div class="sidebar-main">
+                <ul class="sidebar-nav">
+                    <li><a href="{% url 'entry_grid' %}" class="{% if request.resolver_match.url_name == 'entry_grid' %}active{% endif %}">Meal Entry</a></li>
+                    <li><a href="{% url 'member_list' %}" class="{% if 'member' in request.resolver_match.url_name %}active{% endif %}">Members</a></li>
+                    <li><a href="{% url 'bill_list' %}" class="{% if request.resolver_match.url_name == 'bill_list' or request.resolver_match.url_name == 'extra_list' or request.resolver_match.url_name == 'bill_add' or request.resolver_match.url_name == 'extra_add' or request.resolver_match.url_name == 'extra_edit' %}active{% endif %}">Groceries</a></li>
+                    <li><a href="{% url 'fixed_bill_list' %}" class="{% if 'fixed_bill' in request.resolver_match.url_name %}active{% endif %}">Bills</a></li>
+                    <li><a href="{% url 'month_summary' %}" class="{% if request.resolver_match.url_name == 'month_summary' %}active{% endif %}">Month Summary</a></li>
+                </ul>
             </div>
         </aside>
         <main class="main">
@@ -48,5 +49,15 @@
         </main>
     </div>
 </body>
-{% block extra_js %}{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nav = document.querySelector('.sidebar-nav');
+    const activeLink = document.querySelector('.sidebar-nav li a.active');
+    if (nav && activeLink && nav.scrollWidth > nav.clientWidth) {
+        activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+});
+</script>
+{% endblock %}
 </html>

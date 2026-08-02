@@ -6,70 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Login</title>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-
-        .login-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 16px;
-            width: 100%;
-            max-width: 360px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-        }
-
-        .login-card h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            text-align: center;
-            color: var(--color-text-primary);
-        }
-
-        .login-card input[type="text"],
-        .login-card input[type="password"],
-        .login-card input[type="email"] {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
-            font-family: inherit;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            background: var(--color-surface);
-            color: var(--color-text-primary);
-            outline: none;
-            transition: border-color 0.15s, box-shadow 0.15s;
-        }
-
-        .login-card input:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(46, 111, 94, 0.15);
-        }
-
-        .errorlist {
-            list-style: none;
-            margin: 0 0 16px;
-            padding: 0;
-        }
-
-        .errorlist li {
-            color: var(--color-danger);
-            font-size: 12px;
-            margin-bottom: 8px;
-            padding: 8px 12px;
-            background-color: rgba(179, 65, 59, 0.06);
-            border: 1px solid rgba(179, 65, 59, 0.3);
-            border-radius: 6px;
-        }
-    </style>
 </head>
-<body>
+<body class="login-page">
     <div class="login-card">
         <h1>Manager Login</h1>
 

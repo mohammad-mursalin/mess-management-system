@@ -2,64 +2,6 @@
 {% block title %}Month Summary{% endblock %}
 
 {% block extra_head %}
-<style>
-    .summary-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 8px;
-    }
-
-    .summary-header h1 {
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--color-text-primary);
-    }
-
-    .summary-header .cycle-label {
-        font-size: 14px;
-        color: var(--color-text-muted);
-    }
-
-    .totals-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-
-    @media (min-width: 768px) {
-        .totals-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
-
-    .meals-section {
-        margin-top: 24px;
-    }
-
-    .meals-section h2 {
-        font-size: 20px;
-        font-weight: 600;
-        color: var(--color-text-primary);
-        margin-bottom: 16px;
-    }
-
-    .no-cycle {
-        padding: 48px 16px;
-        text-align: center;
-        color: var(--color-text-muted);
-    }
-
-    .no-cycle p:first-child {
-        font-size: 16px;
-    }
-
-    .no-cycle p:last-child {
-        font-size: 14px;
-        color: var(--color-text-muted);
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -82,15 +24,15 @@
     <section class="totals-grid">
         <div class="total-card">
             <div class="total-label">Total Grocery Spend</div>
-            <div class="total-amount">₹{{ total_grocery }}</div>
+            <div class="total-amount">৳{{ total_grocery }}</div>
         </div>
         <div class="total-card">
             <div class="total-label">Total Extra Grocery Spend</div>
-            <div class="total-amount">₹{{ total_extra_grocery }}</div>
+            <div class="total-amount">৳{{ total_extra_grocery }}</div>
         </div>
         <div class="total-card">
             <div class="total-label">Total Fixed Bills</div>
-            <div class="total-amount">₹{{ total_fixed_bills }}</div>
+            <div class="total-amount">৳{{ total_fixed_bills }}</div>
         </div>
         <div class="total-card">
             <div class="total-label">Total Meals Eaten</div>
@@ -100,33 +42,65 @@
 
     <section class="meals-section">
         <h2>Meals Eaten Per Member</h2>
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th class="numeric">Breakfast</th>
-                        <th class="numeric">Lunch</th>
-                        <th class="numeric">Dinner</th>
-                        <th class="numeric">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in member_meals %}
-                    <tr>
-                        <td>{{ m.name }}</td>
-                        <td class="numeric">{{ m.breakfast }}</td>
-                        <td class="numeric">{{ m.lunch }}</td>
-                        <td class="numeric">{{ m.dinner }}</td>
-                        <td class="numeric">{{ m.total }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="empty-row">No members in the current cycle.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="table-view">
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th class="numeric">Breakfast</th>
+                            <th class="numeric">Lunch</th>
+                            <th class="numeric">Dinner</th>
+                            <th class="numeric">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in member_meals %}
+                        <tr>
+                            <td>{{ m.name }}</td>
+                            <td class="numeric">{{ m.breakfast }}</td>
+                            <td class="numeric">{{ m.lunch }}</td>
+                            <td class="numeric">{{ m.dinner }}</td>
+                            <td class="numeric">{{ m.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="empty-row">No members in the current cycle.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-view">
+            {% for m in member_meals %}
+            <div class="list-card">
+                <div class="card-primary">{{ m.name }}</div>
+                <div class="card-field">
+                    <span class="card-field-label">Breakfast</span>
+                    <span class="card-field-value">{{ m.breakfast }}</span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Lunch</span>
+                    <span class="card-field-value">{{ m.lunch }}</span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Dinner</span>
+                    <span class="card-field-value">{{ m.dinner }}</span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Total</span>
+                    <span class="card-field-value">{{ m.total }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="list-card">
+                <div class="card-primary" style="text-align: center; color: var(--color-text-muted);">
+                    No members in the current cycle.
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </section>
     {% else %}

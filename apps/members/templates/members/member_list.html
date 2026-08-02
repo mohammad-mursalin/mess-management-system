@@ -3,77 +3,6 @@
 
 {% block title %}Members — Mess Manager{% endblock %}
 
-{% block extra_head %}
-<style>
-    /* Modal overlay */
-    .modal-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .modal-hidden {
-        display: none;
-    }
-
-    .modal-content {
-        background: var(--color-surface);
-        border-radius: 8px;
-        padding: 24px;
-        max-width: 480px;
-        width: 90%;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-        position: relative;
-    }
-
-    .modal-close {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: none;
-        border: none;
-        font-size: 24px;
-        line-height: 1;
-        cursor: pointer;
-        color: var(--color-text-muted);
-    }
-
-    .modal-close:hover {
-        color: var(--color-text-primary);
-    }
-
-    .modal-header {
-        font-size: 20px;
-        font-weight: 600;
-        color: var(--color-text-primary);
-        margin-bottom: 16px;
-    }
-
-    /* Page title row: title on left, Add Member button on right */
-    .page-title-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-    }
-
-    .page-title-row h1 {
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--color-text-primary);
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="page-title-row">
     <h1>Members</h1>
@@ -96,60 +25,113 @@
     {% endfor %}
 {% endif %}
 
-<div class="table-wrap">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Join Date</th>
-                <th>Leave Date</th>
-                <th>Deposit</th>
-                <th class="actions-cell">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for m in members %}
-            <tr>
-                <td>
-                    <span class="font-medium">{{ m.member.name }}</span>
-                    {% if not m.member.is_active %}
-                        <span class="text-muted" style="font-size: 12px;">(inactive)</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if m.member.is_active %}
-                        <span class="badge badge-active">Active</span>
-                    {% else %}
-                        <span class="badge badge-inactive">Inactive</span>
-                    {% endif %}
-                </td>
-                <td class="text-muted">
-                    {% if m.join_date %}{{ m.join_date|date:"M j, Y" }}{% else %}—{% endif %}
-                </td>
-                <td class="text-muted">
-                    {% if m.leave_date %}{{ m.leave_date|date:"M j, Y" }}{% else %}—{% endif %}
-                </td>
-                <td class="text-muted">
-                    {% if m.deposit %}₹{{ m.deposit }}{% else %}—{% endif %}
-                </td>
-                <td class="actions-cell">
-                    {% if has_cycle %}
-                    <a href="{% url 'edit_member' m.member.id %}" class="action-link">Edit</a>
-                    {% endif %}
-                    <form method="post" action="{% url 'toggle_member_active' m.member.id %}" class="inline-block" onsubmit="return confirm('{% if m.member.is_active %}Deactivate{% else %}Reactivate{% endif %} {{ m.member.name }}?');">
-                        {% csrf_token %}
-                        <button type="submit" class="action-link-danger">{% if m.member.is_active %}Deactivate{% else %}Reactivate{% endif %}</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="empty-row">No members found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="table-view">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Join Date</th>
+                    <th>Leave Date</th>
+                    <th>Deposit</th>
+                    <th class="actions-cell">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in members %}
+                <tr>
+                    <td>
+                        <span class="font-medium">{{ m.member.name }}</span>
+                        {% if not m.member.is_active %}
+                            <span class="text-muted" style="font-size: 12px;">(inactive)</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if m.member.is_active %}
+                            <span class="badge badge-active">Active</span>
+                        {% else %}
+                            <span class="badge badge-inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">
+                        {% if m.join_date %}{{ m.join_date|date:"M j, Y" }}{% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted">
+                        {% if m.leave_date %}{{ m.leave_date|date:"M j, Y" }}{% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted">
+                        {% if m.deposit %}৳{{ m.deposit }}{% else %}—{% endif %}
+                    </td>
+                    <td class="actions-cell">
+                        {% if has_cycle %}
+                        <a href="{% url 'edit_member' m.member.id %}" class="action-link">Edit</a>
+                        {% endif %}
+                        <form method="post" action="{% url 'toggle_member_active' m.member.id %}" class="inline-block" onsubmit="return confirm('{% if m.member.is_active %}Deactivate{% else %}Reactivate{% endif %} {{ m.member.name }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="action-link-danger">{% if m.member.is_active %}Deactivate{% else %}Reactivate{% endif %}</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-row">No members found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card-view">
+    {% for m in members %}
+    <div class="list-card">
+        <div class="card-primary">
+            {{ m.member.name }}
+            {% if not m.member.is_active %}
+                <span class="text-muted" style="font-size: 12px;">(inactive)</span>
+            {% endif %}
+        </div>
+        {% if m.member.is_active %}
+        <span class="badge badge-active card-badge">Active</span>
+        {% else %}
+        <span class="badge badge-inactive card-badge">Inactive</span>
+        {% endif %}
+        <div class="card-field">
+            <span class="card-field-label">Join Date</span>
+            <span class="card-field-value">
+                {% if m.join_date %}{{ m.join_date|date:"M j, Y" }}{% else %}—{% endif %}
+            </span>
+        </div>
+        <div class="card-field">
+            <span class="card-field-label">Leave Date</span>
+            <span class="card-field-value">
+                {% if m.leave_date %}{{ m.leave_date|date:"M j, Y" }}{% else %}—{% endif %}
+            </span>
+        </div>
+        <div class="card-field">
+            <span class="card-field-label">Deposit</span>
+            <span class="card-field-value">
+                {% if m.deposit %}৳{{ m.deposit }}{% else %}—{% endif %}
+            </span>
+        </div>
+        {% if has_cycle %}
+        <div class="card-actions">
+            <a href="{% url 'edit_member' m.member.id %}" class="card-btn-link">Edit</a>
+            <form method="post" action="{% url 'toggle_member_active' m.member.id %}" onsubmit="return confirm('{% if m.member.is_active %}Deactivate{% else %}Reactivate{% endif %} {{ m.member.name }}?');">
+                {% csrf_token %}
+                <button type="submit" class="card-btn-danger">{% if m.member.is_active %}Deactivate{% else %}Reactivate{% endif %}</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="list-card">
+        <div class="card-primary" style="text-align: center; color: var(--color-text-muted);">
+            No members found.
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 {# Add Member Modal #}
@@ -222,49 +204,49 @@
         <form method="post" action="{% url 'edit_member' editing_member.id %}" id="edit-member-form">
             {% csrf_token %}
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="{{ edit_form.join_date.id_for_label }}">Join Date</label>
-                    {{ edit_form.join_date }}
-                    {% if edit_form.join_date.errors %}
-                        <div class="field-error">
-                            <ul>
-                                {% for error in edit_form.join_date.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-                </div>
+             <div class="form-group">
+                 <label for="{{ edit_form.name.id_for_label }}">Name</label>
+                 {{ edit_form.name }}
+                 {% if edit_form.name.errors %}
+                     <div class="field-error">
+                         <ul>
+                             {% for error in edit_form.name.errors %}
+                                 <li>{{ error }}</li>
+                             {% endfor %}
+                         </ul>
+                     </div>
+                 {% endif %}
+             </div>
 
-                <div class="form-group">
-                    <label for="{{ edit_form.leave_date.id_for_label }}">Leave Date</label>
-                    {{ edit_form.leave_date }}
-                    {% if edit_form.leave_date.errors %}
-                        <div class="field-error">
-                            <ul>
-                                {% for error in edit_form.leave_date.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+             <div class="form-row">
+                 <div class="form-group">
+                     <label for="{{ edit_form.join_date.id_for_label }}">Join Date</label>
+                     {{ edit_form.join_date }}
+                     {% if edit_form.join_date.errors %}
+                         <div class="field-error">
+                             <ul>
+                                 {% for error in edit_form.join_date.errors %}
+                                     <li>{{ error }}</li>
+                                 {% endfor %}
+                             </ul>
+                         </div>
+                     {% endif %}
+                 </div>
 
-            <div class="form-group">
-                <label for="{{ edit_form.deposit_amount.id_for_label }}">Deposit Amount</label>
-                {{ edit_form.deposit_amount }}
-                {% if edit_form.deposit_amount.errors %}
-                    <div class="field-error">
-                        <ul>
-                            {% for error in edit_form.deposit_amount.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-            </div>
+                 <div class="form-group">
+                     <label for="{{ edit_form.deposit_amount.id_for_label }}">Deposit Amount</label>
+                     {{ edit_form.deposit_amount }}
+                     {% if edit_form.deposit_amount.errors %}
+                         <div class="field-error">
+                             <ul>
+                                 {% for error in edit_form.deposit_amount.errors %}
+                                     <li>{{ error }}</li>
+                                 {% endfor %}
+                             </ul>
+                         </div>
+                     {% endif %}
+                 </div>
+             </div>
 
             <div class="notice notice-warn">
                 This affects which dates this member can have meal entries.

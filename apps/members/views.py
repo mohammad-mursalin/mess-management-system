@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -119,8 +121,9 @@ def edit_member(request, member_id):
     if request.method == 'POST':
         form = EditMemberForm(request.POST)
         if form.is_valid():
+            member.name = form.cleaned_data['name']
+            member.save()
             mc.join_date = form.cleaned_data['join_date']
-            mc.leave_date = form.cleaned_data.get('leave_date')
             mc.deposit_amount = form.cleaned_data.get('deposit_amount') or 0
             mc.save()
             messages.success(request, f"Member '{member.name}' updated.")
@@ -128,8 +131,8 @@ def edit_member(request, member_id):
         return _render_page(request, cycle, editing_member=member, edit_form=form)
 
     form = EditMemberForm(initial={
+        'name': member.name,
         'join_date': mc.join_date or cycle.start_date,
-        'leave_date': mc.leave_date,
         'deposit_amount': mc.deposit_amount,
     })
     return _render_page(request, cycle, editing_member=member, edit_form=form)
@@ -139,12 +142,17 @@ def edit_member(request, member_id):
 @require_POST
 def toggle_member_active(request, member_id):
     member = get_object_or_404(Member, pk=member_id)
+    cycle = get_current_cycle()
 
     if member.is_active:
         member.is_active = False
+        if cycle:
+            MemberCycle.objects.filter(member=member, cycle=cycle).update(leave_date=date.today())
         messages.success(request, f"Member '{member.name}' deactivated.")
     else:
         member.is_active = True
+        if cycle:
+            MemberCycle.objects.filter(member=member, cycle=cycle).update(leave_date=None)
         messages.success(request, f"Member '{member.name}' reactivated.")
 
     member.save()

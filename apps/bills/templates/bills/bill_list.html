@@ -1,15 +1,6 @@
 {% extends 'base_manager.html' %}
 {% block title %}Fixed Bills — Mess Manager{% endblock %}
 
-{% block extra_head %}
-<style>
-    .desc-cell {
-        color: var(--color-text-muted);
-        font-size: 12px;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="page-title-row">
     <h1>Fixed Bills</h1>
@@ -77,33 +68,71 @@
     </form>
 </div>
 
-<div class="table-wrap">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Bill Type</th>
-                <th class="numeric">Amount</th>
-                <th>Description</th>
-                <th class="actions-cell">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for bill in bills %}
-            <tr>
-                <td>{{ bill.bill_date|date:"M j, Y" }}</td>
-                <td><span class="badge badge-{{ bill.bill_type }}">{{ bill.get_bill_type_display }}</span></td>
-                <td class="numeric">₹{{ bill.amount }}</td>
-                <td class="desc-cell">{{ bill.description|default:''|linebreaksbr }}</td>
-                <td class="actions-cell">
-                    <a href="{% url 'fixed_bill_edit' bill.id %}" class="action-link">Edit</a>
-                    <form method="post" action="{% url 'fixed_bill_delete' bill.id %}" class="inline-block" onsubmit="return confirm('Delete this fixed bill?');">{% csrf_token %}<button type="submit" class="action-link-danger">Delete</button></form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="empty-row">No fixed bills yet.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="table-view">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Bill Type</th>
+                    <th class="numeric">Amount</th>
+                    <th>Description</th>
+                    <th class="actions-cell">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                <tr>
+                    <td>{{ bill.bill_date|date:"M j, Y" }}</td>
+                    <td><span class="badge badge-{{ bill.bill_type }}">{{ bill.get_bill_type_display }}</span></td>
+                    <td class="numeric">৳{{ bill.amount }}</td>
+                    <td class="desc-cell">{{ bill.description|default:''|linebreaksbr }}</td>
+                    <td class="actions-cell">
+                        <a href="{% url 'fixed_bill_edit' bill.id %}" class="action-link">Edit</a>
+                        <form method="post" action="{% url 'fixed_bill_delete' bill.id %}" class="inline-block" onsubmit="return confirm('Delete this fixed bill?');">{% csrf_token %}<button type="submit" class="action-link-danger">Delete</button></form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-row">No fixed bills yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card-view">
+    {% for bill in bills %}
+    <div class="list-card">
+        <div class="card-primary">
+            <span class="badge badge-{{ bill.bill_type }}">{{ bill.get_bill_type_display }}</span>
+            <span class="card-amount" style="margin-left: 8px;">৳{{ bill.amount }}</span>
+        </div>
+        <div class="card-field">
+            <span class="card-field-label">Date</span>
+            <span class="card-field-value">{{ bill.bill_date|date:"M j, Y" }}</span>
+        </div>
+        {% if bill.description %}
+        <div class="card-field">
+            <span class="card-field-label">Description</span>
+            <span class="card-field-value">{{ bill.description|linebreaksbr }}</span>
+        </div>
+        {% endif %}
+        <div class="card-actions">
+            <a href="{% url 'fixed_bill_edit' bill.id %}" class="card-btn-link">Edit</a>
+            <form method="post" action="{% url 'fixed_bill_delete' bill.id %}" onsubmit="return confirm('Delete this fixed bill?');">
+                {% csrf_token %}
+                <button type="submit" class="card-btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="list-card">
+        <div class="card-primary" style="text-align: center; color: var(--color-text-muted);">
+            No fixed bills yet.
+        </div>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

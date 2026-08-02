@@ -6,63 +6,170 @@
     </div>
 {% else %}
 
-    <!-- Date selector -->
-    <div class="date-selector-bar">
-        <form hx-get="{% url 'entry_grid' %}" hx-target="#grid-area" class="date-form">
-            <button type="submit" name="date" value="{{ prev_date|date:'Y-m-d' }}"
-                    class="date-arrow"
-                    {% if prev_date < open_cycle.start_date %}disabled{% endif %}>&lt;</button>
-            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
-                   onchange="this.form.submit()" class="date-input">
-            <button type="submit" name="date" value="{{ next_date|date:'Y-m-d' }}"
-                    class="date-arrow"
-                    {% if open_cycle.end_date and next_date > open_cycle.end_date %}disabled{% endif %}>&gt;</button>
-            <span class="date-label">{{ selected_date|date:"D, M j, Y" }}</span>
-            {% if open_cycle.status == 'closed' %}
-                <span class="badge badge-closed">Cycle closed</span>
-            {% endif %}
-        </form>
+    {% if not member_cycles and not no_open_cycle %}
+    <div class="empty-state">
+        <p>No members are eligible for this date. Check join/leave dates.</p>
     </div>
+    {% endif %}
 
-    <!-- Today's counts -->
-    <div id="counts-summary" class="counts-section">
-        {% include 'meals/partials/counts_summary.html' with counts=counts selected_date=selected_date %}
-    </div>
+    <!-- ===== Desktop view (table + full date selector + counts) ===== -->
+    <div class="table-view">
 
-    <!-- Meal grid table -->
-    <div class="table-wrap">
-        <table class="meal-grid">
-            <thead>
-                <tr>
-                    <th class="col-member">Member</th>
-                    <th class="col-meal">Breakfast</th>
-                    <th class="col-meal">Lunch</th>
-                    <th class="col-meal">Dinner</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for mc in member_cycles %}
+        <!-- Date selector bar -->
+        <div class="date-selector-bar">
+            <form hx-get="{% url 'entry_grid_body' %}" hx-target="#grid-area" class="date-form">
+                <button type="submit" name="date" value="{{ prev_date|date:'Y-m-d' }}"
+                        class="date-arrow"
+                        {% if prev_date < open_cycle.start_date %}disabled{% endif %}>&lt;</button>
+                <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
+                       onchange="this.form.submit()" class="date-input">
+                <button type="submit" name="date" value="{{ next_date|date:'Y-m-d' }}"
+                        class="date-arrow"
+                        {% if open_cycle.end_date and next_date > open_cycle.end_date %}disabled{% endif %}>&gt;</button>
+                <span class="date-label">{{ selected_date|date:"D, M j, Y" }}</span>
+                {% if open_cycle.status == 'closed' %}
+                    <span class="badge badge-closed">Cycle closed</span>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Today's counts -->
+        <div class="counts-section">
+            <div class="counts-row">
+                <div class="count-card">
+                    <span class="count-label">Breakfast</span>
+                    <span class="count-value">{{ counts.breakfast_count }}</span>
+                </div>
+                <div class="count-card">
+                    <span class="count-label">Lunch</span>
+                    <span class="count-value">{{ counts.lunch_count }}</span>
+                </div>
+                <div class="count-card">
+                    <span class="count-label">Dinner</span>
+                    <span class="count-value">{{ counts.dinner_count }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meal grid table -->
+        <div class="table-wrap meal-grid-table-wrap">
+            <table class="meal-grid">
+                <thead>
+                    <tr>
+                        <th class="col-member">Member</th>
+                        <th class="col-meal">Breakfast</th>
+                        <th class="col-meal">Lunch</th>
+                        <th class="col-meal">Dinner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mc in member_cycles %}
                     <tr>
                         <td class="member-name">{{ mc.member.name }}</td>
                         {% with entry=entry_map|dict_get:mc.id %}
-                            {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='breakfast' meal_choices=BREAKFAST_CHOICES %}
-                            {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='lunch' meal_choices=LUNCH_CHOICES %}
-                            {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='dinner' meal_choices=DINNER_CHOICES %}
+                        <td>
+                            <div class="meal-cell cell-target-{{ mc.id }}-breakfast"
+                                 id="cell-desktop-{{ mc.id }}-breakfast">
+                                {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='breakfast' meal_choices=meal_choices_map.breakfast meal_step=meal_step_map.breakfast cell_prefix="cell-desktop-" %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="meal-cell cell-target-{{ mc.id }}-lunch"
+                                 id="cell-desktop-{{ mc.id }}-lunch">
+                                {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='lunch' meal_choices=meal_choices_map.lunch meal_step=meal_step_map.lunch cell_prefix="cell-desktop-" %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="meal-cell cell-target-{{ mc.id }}-dinner"
+                                 id="cell-desktop-{{ mc.id }}-dinner">
+                                {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='dinner' meal_choices=meal_choices_map.dinner meal_step=meal_step_map.dinner cell_prefix="cell-desktop-" %}
+                            </div>
+                        </td>
                         {% endwith %}
                     </tr>
-                {% empty %}
+                    {% empty %}
                     <tr>
                         <td colspan="4" class="empty-row">No active members in the current cycle.</td>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    {% if not member_cycles and not no_open_cycle %}
-        <div class="empty-state">
-            <p>No members are eligible for this date. Check join/leave dates.</p>
+    <!-- ===== Mobile view (compact sticky header + member cards) ===== -->
+    <div class="card-view">
+
+        <!-- Compact sticky header (mobile-spec.md §4.1) -->
+        <div class="meal-header-sticky">
+            <div class="date-selector-bar-mobile">
+                <form hx-get="{% url 'entry_grid_body' %}" hx-target="#grid-area" class="date-form-mobile">
+                    <button type="submit" name="date" value="{{ prev_date|date:'Y-m-d' }}"
+                            class="date-arrow-mobile"
+                            {% if prev_date < open_cycle.start_date %}disabled{% endif %}>&lt;</button>
+                    <span class="date-display-mobile">{{ selected_date|date:"M j, Y" }}</span>
+                    <button type="submit" name="date" value="{{ next_date|date:'Y-m-d' }}"
+                            class="date-arrow-mobile"
+                            {% if open_cycle.end_date and next_date > open_cycle.end_date %}disabled{% endif %}>&gt;</button>
+                </form>
+                {% if open_cycle.status == 'closed' %}
+                    <span class="badge badge-closed date-badge-mobile">Cycle closed</span>
+                {% endif %}
+            </div>
+
+            <!-- Compact counts strip -->
+            <div class="counts-section-mobile">
+                <div class="counts-inline">
+                    <span class="count-item"><span class="count-icon" aria-label="Breakfast count: {{ counts.breakfast_count }}">🍳</span><span class="count-num">{{ counts.breakfast_count }}</span></span>
+                    <span class="count-item"><span class="count-icon" aria-label="Lunch count: {{ counts.lunch_count }}">🍛</span><span class="count-num">{{ counts.lunch_count }}</span></span>
+                    <span class="count-item"><span class="count-icon" aria-label="Dinner count: {{ counts.dinner_count }}">🌙</span><span class="count-num">{{ counts.dinner_count }}</span></span>
+                </div>
+            </div>
         </div>
-    {% endif %}
+
+        <!-- Member cards (mobile-spec.md §4.2) -->
+        <div class="meal-grid-mobile">
+            {% for mc in member_cycles %}
+            <div class="meal-member-card">
+                <div class="member-name">{{ mc.member.name }}</div>
+
+                {% with entry=entry_map|dict_get:mc.id %}
+                <!-- Breakfast -->
+                <div class="meal-row">
+                    <span class="meal-row-label">Breakfast</span>
+                    <div class="meal-cell cell-target-{{ mc.id }}-breakfast"
+                         id="cell-mobile-{{ mc.id }}-breakfast">
+                        {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='breakfast' meal_choices=meal_choices_map.breakfast meal_step=meal_step_map.breakfast cell_prefix="cell-mobile-" %}
+                    </div>
+                </div>
+
+                <!-- Lunch -->
+                <div class="meal-row">
+                    <span class="meal-row-label">Lunch</span>
+                    <div class="meal-cell cell-target-{{ mc.id }}-lunch"
+                         id="cell-mobile-{{ mc.id }}-lunch">
+                        {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='lunch' meal_choices=meal_choices_map.lunch meal_step=meal_step_map.lunch cell_prefix="cell-mobile-" %}
+                    </div>
+                </div>
+
+                <!-- Dinner -->
+                <div class="meal-row">
+                    <span class="meal-row-label">Dinner</span>
+                    <div class="meal-cell cell-target-{{ mc.id }}-dinner"
+                         id="cell-mobile-{{ mc.id }}-dinner">
+                        {% include 'meals/partials/meal_cell.html' with mc=mc entry=entry entry_date=selected_date meal_type='dinner' meal_choices=meal_choices_map.dinner meal_step=meal_step_map.dinner cell_prefix="cell-mobile-" %}
+                    </div>
+                </div>
+                {% endwith %}
+            </div>
+            {% empty %}
+            <div class="meal-member-card">
+                <div class="member-name" style="text-align: center; color: var(--color-text-muted);">
+                    No active members in the current cycle.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
 {% endif %}

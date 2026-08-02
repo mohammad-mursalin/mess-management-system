@@ -2,49 +2,6 @@
 {% block title %}Mess Dashboard{% endblock %}
 
 {% block extra_head %}
-<style>
-    .dashboard-updated {
-        font-size: 12px;
-        color: var(--color-text-muted);
-        margin-bottom: 24px;
-    }
-
-    /* Today's meal counts — flex, stack under 480px */
-    .today-counts {
-        display: flex;
-        gap: 16px;
-        margin-bottom: 32px;
-    }
-
-    @media (max-width: 480px) {
-        .today-counts {
-            flex-direction: column;
-        }
-    }
-
-    /* Sortable table headers */
-    .members-table th.sortable {
-        cursor: pointer;
-        user-select: none;
-        padding: 12px 16px;
-    }
-
-    .members-table th.sortable:hover {
-        color: var(--color-primary);
-    }
-
-    .members-table th .sort-indicator {
-        margin-left: 4px;
-        font-size: 12px;
-        opacity: 0.4;
-    }
-
-    .members-table th.sort-asc .sort-indicator.asc,
-    .members-table th.sort-desc .sort-indicator.desc {
-        opacity: 1;
-        color: var(--color-primary);
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -68,46 +25,82 @@
     </section>
 
     <section>
-        <table class="data-table members-table">
-            <thead>
-                <tr>
-                    <th class="sortable" data-col="name">
-                        Name<span class="sort-indicator">⇅</span>
-                    </th>
-                    <th class="sortable" data-col="deposit" data-type="number">
-                        Deposit Given<span class="sort-indicator">⇅</span>
-                    </th>
-                    <th class="sortable" data-col="breakfast" data-type="number">
-                        Breakfast<span class="sort-indicator">⇅</span>
-                    </th>
-                    <th class="sortable" data-col="lunch" data-type="number">
-                        Lunch<span class="sort-indicator">⇅</span>
-                    </th>
-                    <th class="sortable" data-col="dinner" data-type="number">
-                        Dinner<span class="sort-indicator">⇅</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody id="members-tbody">
-                {% for member in members %}
-                <tr data-name="{{ member.name }}"
-                    data-deposit="{{ member.deposit }}"
-                    data-breakfast="{{ member.breakfast }}"
-                    data-lunch="{{ member.lunch }}"
-                    data-dinner="{{ member.dinner }}">
-                    <td>{{ member.name }}</td>
-                    <td class="numeric">₹{{ member.deposit }}</td>
-                    <td class="numeric">{{ member.breakfast }}</td>
-                    <td class="numeric">{{ member.lunch }}</td>
-                    <td class="numeric">{{ member.dinner }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="empty-row">No members in the current cycle.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-view">
+            <table class="data-table members-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-col="name">
+                            Name<span class="sort-indicator">⇅</span>
+                        </th>
+                        <th class="sortable" data-col="deposit" data-type="number">
+                            Deposit Given<span class="sort-indicator">⇅</span>
+                        </th>
+                        <th class="sortable" data-col="breakfast" data-type="number">
+                            Breakfast<span class="sort-indicator">⇅</span>
+                        </th>
+                        <th class="sortable" data-col="lunch" data-type="number">
+                            Lunch<span class="sort-indicator">⇅</span>
+                        </th>
+                        <th class="sortable" data-col="dinner" data-type="number">
+                            Dinner<span class="sort-indicator">⇅</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="members-tbody">
+                    {% for member in members %}
+                    <tr data-name="{{ member.name }}"
+                        data-deposit="{{ member.deposit }}"
+                        data-breakfast="{{ member.breakfast }}"
+                        data-lunch="{{ member.lunch }}"
+                        data-dinner="{{ member.dinner }}">
+                        <td>{{ member.name }}</td>
+                        <td class="numeric">৳{{ member.deposit }}</td>
+                        <td class="numeric">{{ member.breakfast }}</td>
+                        <td class="numeric">{{ member.lunch }}</td>
+                        <td class="numeric">{{ member.dinner }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-row">No members in the current cycle.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-view">
+            {% for member in members %}
+            <div class="list-card" data-name="{{ member.name }}"
+                                   data-deposit="{{ member.deposit }}"
+                                   data-breakfast="{{ member.breakfast }}"
+                                   data-lunch="{{ member.lunch }}"
+                                   data-dinner="{{ member.dinner }}">
+                <div class="card-primary">{{ member.name }}</div>
+                <div class="card-field">
+                    <span class="card-field-label">Deposit Given</span>
+                    <span class="card-field-value">৳{{ member.deposit }}</span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Breakfast</span>
+                    <span class="card-field-value">{{ member.breakfast }}</span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Lunch</span>
+                    <span class="card-field-value">{{ member.lunch }}</span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Dinner</span>
+                    <span class="card-field-value">{{ member.dinner }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="list-card">
+                <div class="card-primary" style="text-align: center; color: var(--color-text-muted);">
+                    No members in the current cycle.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </section>
 {% endblock %}
 
@@ -141,21 +134,32 @@
             th.classList.add(currentDir === 'asc' ? 'sort-asc' : 'sort-desc');
 
             var rows = Array.from(tbody.querySelectorAll('tr'));
-            rows.sort(function(a, b) {
-                var va = a.getAttribute('data-' + col);
-                var vb = b.getAttribute('data-' + col);
+            var cards = Array.from(document.querySelectorAll('.card-view .list-card[data-name]'));
 
-                if (type === 'number') {
-                    va = parseFloat(va) || 0;
-                    vb = parseFloat(vb) || 0;
-                }
+            function sortByData(arr) {
+                arr.sort(function(a, b) {
+                    var va = a.getAttribute('data-' + col);
+                    var vb = b.getAttribute('data-' + col);
 
-                if (va < vb) return currentDir === 'asc' ? -1 : 1;
-                if (va > vb) return currentDir === 'asc' ? 1 : -1;
-                return 0;
-            });
+                    if (type === 'number') {
+                        va = parseFloat(va) || 0;
+                        vb = parseFloat(vb) || 0;
+                    }
+
+                    if (va < vb) return currentDir === 'asc' ? -1 : 1;
+                    if (va > vb) return currentDir === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            sortByData(rows);
+            sortByData(cards);
 
             rows.forEach(function(row) { tbody.appendChild(row); });
+            var cardContainer = document.querySelector('.card-view');
+            if (cardContainer) {
+                cards.forEach(function(card) { cardContainer.appendChild(card); });
+            }
         });
     });
 })();

@@ -233,12 +233,14 @@ body {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* Table container — frames data tables with card-style border + radius */
+/* Table container — frames data tables with card-style border + radius.
+   On mobile (≤768px), tables are hidden via .table-view { display: none };
+   cards take over. overflow-x:auto is a desktop safety net. */
 .table-wrap {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    overflow: hidden;
+    overflow-x: auto;
     margin-bottom: 24px;
 }
 
@@ -771,15 +773,27 @@ body {
     color: var(--color-text-primary);
 }
 
-.sidebar-footer a {
-    display: block;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    font-size: 12px;
+.sidebar-logout-form {
     margin-top: 4px;
 }
 
-.sidebar-footer a:hover {
+.sidebar-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 4px 0;
+    text-decoration: none;
+    min-height: 44px;
+    min-width: 44px;
+}
+
+.sidebar-logout-btn:hover {
     color: var(--color-danger);
 }
 
@@ -791,16 +805,34 @@ body {
     width: 100%;
 }
 
-/* Mobile: sidebar collapses to top bar (ui-spec.md §1.5) */
+/* ============================================================
+   Breakpoints (mobile-spec.md §1)
+   phone: ≤480px  |  mobile: 481–768px  |  desktop: >768px
+   768px is the single structural breakpoint (layout/sidebar/tables).
+   480px is fine-tuning only (spacing/sizing).
+   ============================================================ */
+
+/* ============================================================
+   Layout fix (mobile-spec.md §2)
+   At ≤768px: .app becomes display:block (not flex),
+   sidebar becomes sticky top bar, main is full-width.
+   ============================================================ */
 @media (max-width: 768px) {
+    .app {
+        display: block;
+    }
+
     .sidebar {
-        position: relative;
+        position: sticky;
+        top: 0;
+        z-index: 10;
         width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 12px 16px;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        padding: 8px 16px;
         gap: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
 
     .sidebar-brand {
@@ -820,6 +852,7 @@ body {
     }
 
     .sidebar-nav {
+        flex: none;
         display: flex;
         gap: 4px;
         flex-wrap: wrap;
@@ -830,30 +863,580 @@ body {
         border-left: none;
         border-radius: 6px;
         font-size: 12px;
+        min-height: 44px;
     }
 
     .sidebar-footer {
         border-top: none;
         padding: 0;
         margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar-logout-form {
+        margin-top: 0;
+    }
+
+    .sidebar-logout-btn {
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--color-border);
     }
 
     .main {
         margin-left: 0;
+        width: 100%;
         padding: 16px;
+    }
+
+    /* Tables → Cards (mobile-spec.md §3) */
+    .table-view {
+        display: none;
+    }
+
+    .card-view {
+        display: block;
+    }
+
+    /* Meal header sticks at top */
+    .meal-header-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--color-bg);
+        margin-bottom: 8px;
+    }
+}
+
+/* Phone tier: tighter spacing (mobile-spec.md §1) */
+@media (max-width: 480px) {
+    .main {
+        padding: 12px;
+    }
+
+    .sidebar-nav li a {
+        padding: 6px 10px;
+        font-size: 12px;
     }
 }
 
 /* ============================================================
-   Public layout (ui-spec.md §1.5, §2.2)
-   Max 720px content, no sidebar, single column, mobile-first.
+   Card List Views (mobile-spec.md §3)
+   Shown on mobile (≤768px) instead of tables.
+   Desktop: .card-view { display: none }
    ============================================================ */
 
-.public-page {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 16px;
+.card-view {
+    display: none;
 }
+
+@media (max-width: 768px) {
+    .card-view {
+        display: block;
+    }
+
+    /* Card component (mobile-spec.md §3.1) */
+    .list-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .list-card .card-primary {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 8px;
+    }
+
+    .list-card .card-badge {
+        float: right;
+        margin-top: -4px;
+    }
+
+    .list-card .card-field {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .list-card .card-field-label {
+        font-size: 12px;
+        color: var(--color-text-muted);
+    }
+
+    .list-card .card-field-value {
+        font-size: 14px;
+        color: var(--color-text-primary);
+        text-align: right;
+    }
+
+    /* Action buttons at bottom of cards (mobile-spec.md §3.1) */
+    .card-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .card-actions .card-btn {
+        flex: 1;
+        min-height: 44px;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: center;
+        border: none;
+    }
+
+    .card-btn-primary {
+        background: var(--color-primary);
+        color: #FFFFFF;
+    }
+
+    .card-btn-primary:hover {
+        background: var(--color-primary-hover);
+    }
+
+    .card-btn-ghost {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+    }
+
+    .card-btn-ghost:hover {
+        background: var(--color-bg);
+    }
+
+    .card-btn-danger {
+        background: var(--color-danger);
+        color: #FFFFFF;
+    }
+
+    .card-btn-danger:hover {
+        opacity: 0.85;
+    }
+
+    .card-btn-link {
+        background: none;
+        border: none;
+        color: var(--color-primary);
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: underline;
+        min-height: 44px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-btn-link-danger {
+        background: none;
+        border: none;
+        color: var(--color-danger);
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: underline;
+        min-height: 44px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Grocery item breakdown inside cards */
+    .card-items {
+        margin-top: 8px;
+        border-top: 1px solid var(--color-border);
+        padding-top: 8px;
+    }
+
+    .card-item-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+        font-size: 12px;
+    }
+
+    .card-item-row .item-name {
+        color: var(--color-text-primary);
+    }
+
+    .card-item-row .item-qty {
+        color: var(--color-text-muted);
+    }
+}
+
+/* ============================================================
+   Mobile Meal Grid (mobile-spec.md §4)
+   Compact header (≤120px), member cards, 44×44px buttons.
+   ============================================================ */
+
+@media (max-width: 768px) {
+    /* Hide the desktop meal grid table */
+    .meal-grid {
+        display: none;
+    }
+
+    /* Compact sticky header */
+    .meal-header-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--color-bg);
+        margin-bottom: 8px;
+    }
+
+    /* Date selector row: 44px */
+    .date-selector-bar-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+        padding: 0 4px;
+        height: 44px;
+    }
+
+    .date-form-mobile {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex: 1;
+    }
+
+    .date-arrow-mobile {
+        min-width: 44px;
+        min-height: 44px;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        font-size: 16px;
+        font-family: inherit;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .date-arrow-mobile:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .date-arrow-mobile:hover:not(:disabled) {
+        background: var(--color-bg);
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
+    .date-display-mobile {
+        flex: 1;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+
+    .date-badge-mobile {
+        margin-left: 8px;
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    /* Counts row: compact inline strip, ~40px */
+    .counts-inline {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        height: 40px;
+        font-size: 14px;
+        color: var(--color-text-muted);
+    }
+
+    .counts-inline .count-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .counts-inline .count-icon {
+        font-size: 16px;
+    }
+
+    .counts-inline .count-num {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--color-primary);
+    }
+
+    /* Mobile: counts section shows inline strip */
+    .counts-section-mobile {
+        margin-bottom: 8px;
+    }
+
+    /* Member cards replacing the table */
+    .meal-member-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .meal-member-card .member-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 8px;
+    }
+
+    .meal-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .meal-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .meal-row-label {
+        font-size: 14px;
+        color: var(--color-text-muted);
+        min-width: 70px;
+        flex-shrink: 0;
+    }
+
+    /* Meal cell error (mobile-spec.md §4.2) */
+    .meal-cell-error {
+        color: var(--color-danger);
+        font-size: 12px;
+        margin-top: 4px;
+    }
+}
+
+/* ============================================================
+   Touch Targets (mobile-spec.md §5)
+   Every interactive element: min-width 44px, min-height 44px.
+   Applied unconditionally because this app is touch-first.
+   ============================================================ */
+
+button,
+.btn,
+.btn-primary,
+.btn-primary-sm,
+.btn-ghost,
+.btn-link,
+.btn-danger,
+.action-link,
+.action-link-danger,
+.remove-btn,
+.date-arrow,
+.tab-nav a,
+.card-btn,
+.card-btn-link,
+.card-btn-link-danger,
+.toggle-handle,
+.sidebar-nav li a,
+.sidebar-logout-btn,
+.stepper-btn {
+    min-height: 44px;
+}
+
+/* Action links: make them flex for vertical centering in 44px height */
+.action-link,
+.action-link-danger,
+.btn-link,
+.toggle-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Minimum width for all interactive elements */
+button,
+.btn,
+.btn-primary,
+.btn-primary-sm,
+.btn-ghost,
+.btn-link,
+.btn-danger,
+.action-link,
+.action-link-danger,
+.remove-btn,
+.date-arrow,
+.tab-nav a,
+.card-btn,
+.card-btn-link,
+.card-btn-link-danger,
+.toggle-handle,
+.sidebar-nav li a,
+.sidebar-logout-btn,
+.stepper-btn {
+    min-width: 44px;
+}
+
+/* pointer: coarse reinforces the rule on actual touch devices */
+@media (pointer: coarse) {
+    button,
+    .btn,
+    .btn-primary,
+    .btn-primary-sm,
+    .btn-ghost,
+    .btn-link,
+    .btn-danger,
+    .action-link,
+    .action-link-danger,
+    .remove-btn,
+    .date-arrow,
+    .tab-nav a,
+    .sidebar-nav li a,
+    .sidebar-logout-btn,
+    .stepper-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Remove button inside item rows — larger touch area */
+.remove-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+}
+
+@media (max-width: 480px) {
+    .tab-nav {
+        flex-wrap: wrap;
+    }
+
+    .tab-nav a {
+        flex: 1;
+        min-width: 44px;
+    }
+}
+
+/* ============================================================
+   Dashboard home styles (moved from inline <style>)
+   ============================================================ */
+
+.dashboard-updated {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-bottom: 24px;
+}
+
+.today-counts {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 480px) {
+    .today-counts {
+        flex-direction: column;
+    }
+}
+
+.members-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    padding: 12px 16px;
+}
+
+.members-table th.sortable:hover {
+    color: var(--color-primary);
+}
+
+.members-table th .sort-indicator {
+    margin-left: 4px;
+    font-size: 12px;
+    opacity: 0.4;
+}
+
+.members-table th.sort-asc .sort-indicator.asc,
+.members-table th.sort-desc .sort-indicator.desc {
+    opacity: 1;
+    color: var(--color-primary);
+}
+
+/* ============================================================
+   Month summary styles (moved from inline <style>)
+   ============================================================ */
+
+.summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.summary-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.summary-header .cycle-label {
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+.totals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (min-width: 769px) {
+    .totals-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.meals-section {
+    margin-top: 24px;
+}
+
+.meals-section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 16px;
+}
+
+.no-cycle {
+    padding: 48px 16px;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.no-cycle p:first-child {
+    font-size: 16px;
+}
+
+.no-cycle p:last-child {
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+
 
 .public-header {
     display: flex;
@@ -894,10 +1477,7 @@ body {
     margin-top: 32px;
 }
 
-/* ============================================================
-   Page title row (shared across manager pages)
-   ============================================================ */
-
+/* Page title row */
 .page-title-row {
     display: flex;
     align-items: center;
@@ -929,13 +1509,14 @@ body {
 }
 
 .tab-nav a {
-    padding: 4px 12px;
+    padding: 10px 16px;
     font-size: 12px;
     font-weight: 600;
     border-radius: 6px;
     color: var(--color-text-muted);
     text-decoration: none;
     cursor: pointer;
+    min-height: 44px;
 }
 
 .tab-nav a.active {
@@ -946,3 +1527,434 @@ body {
 .tab-nav a:hover:not(.active) {
     background: var(--color-surface);
 }
+
+/* ============================================================
+   Meal Grid — desktop table (moved from entry_grid.html inline <style>)
+   ============================================================ */
+
+.date-selector-bar {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.date-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.date-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+}
+
+.date-arrow:hover:not(:disabled) {
+    background: var(--color-bg);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.date-arrow:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.date-input {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--color-text-primary);
+    background: var(--color-surface);
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(46, 111, 94, 0.15);
+}
+
+.date-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-left: 4px;
+}
+
+.counts-section {
+    margin-bottom: 16px;
+}
+
+.counts-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+/* Meal grid table */
+
+.meal-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+@media (max-width: 480px) {
+    .counts-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.meal-grid thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.meal-grid thead th {
+    background: var(--color-surface);
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.meal-grid td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.meal-grid tr:last-child td {
+    border-bottom: none;
+}
+
+.col-member { width: 28%; }
+.col-meal { width: 24%; }
+
+.member-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.meal-cell {
+    display: flex;
+    gap: 4px;
+}
+
+/* ============================================================
+   Meal cell buttons — base + hover/active/disabled states (shared)
+   ============================================================ */
+
+.meal-cell-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.meal-quick-select {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.meal-stepper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meal-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.1s, border-color 0.1s, color 0.1s;
+}
+
+.meal-btn:not(.active):hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.meal-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #FFFFFF;
+}
+
+.meal-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.stepper-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.1s, border-color 0.1s, color 0.1s;
+}
+
+.stepper-btn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.stepper-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.stepper-value {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--color-text-primary);
+}
+
+.guest-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(46, 111, 94, 0.12);
+    color: var(--color-primary);
+    white-space: nowrap;
+}
+
+/* Desktop meal buttons (min-width: 769px = >768px) */
+@media (min-width: 769px) {
+    .meal-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+}
+
+/* Mobile meal buttons (max-width: 768px) — font-size 14px, flex layout */
+@media (max-width: 768px) {
+    .meal-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        height: 44px;
+        font-size: 14px;
+    }
+
+    .stepper-btn {
+        flex: 1;
+        height: 44px;
+        font-size: 14px;
+    }
+
+    .stepper-value {
+        flex: 1;
+        font-size: 14px;
+    }
+}
+
+.cell-error {
+    color: var(--color-danger);
+    font-size: 12px;
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+/* Desc cell in fixed bills */
+.desc-cell {
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+/* ============================================================
+   Login page styles (moved from registration/login.html)
+   ============================================================ */
+
+.login-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 16px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    margin: 0 auto;
+}
+
+.login-card h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+    color: var(--color-text-primary);
+}
+
+.errorlist {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+}
+
+.errorlist li {
+    color: var(--color-danger);
+    font-size: 12px;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background-color: rgba(179, 65, 59, 0.06);
+    border: 1px solid rgba(179, 65, 59, 0.3);
+    border-radius: 6px;
+}
+
+/* ============================================================
+   Modal styles (moved from member_list.html inline <style>)
+   ============================================================ */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.modal-close:hover {
+    color: var(--color-text-primary);
+}
+
+.modal-header {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 16px;
+}
+
+/* Login page body centering */
+body.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+/* Login page inputs — must be 16px to prevent iOS zoom (mobile-spec.md §5) */
+body.login-page input[type="text"],
+body.login-page input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-family: inherit;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    outline: none;
+    box-sizing: border-box;
+}
+
+body.login-page input[type="text"]:focus,
+body.login-page input[type="password"]:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(46, 111, 94, 0.15);
+}
+
+/* ============================================================
+   HTMX Loading States
+   ============================================================ */
+
+[htmx-request] {
+    opacity: 0.7;
+}
+
+[htmx-swapping] {
+    opacity: 0.5;
+}
+
+[htmx-settling] {
+    opacity: 0.8;
+}
+
+

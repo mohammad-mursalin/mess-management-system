@@ -1,8 +1,11 @@
 {% load meal_extras %}
-<td>
-    <div class="meal-cell" id="cell-{{ mc.id }}-{{ meal_type }}">
+{% with current_val=entry|meal_value:meal_type|default:"0" %}
+{% stepper_values current_val meal_step as sv %}
+{% with guest_count=current_val|meal_guest_count:meal_type %}
+<div class="meal-cell-inner">
+    <div class="meal-quick-select">
         {% for val, label in meal_choices %}
-            {% with current_val=entry|meal_value:meal_type %}
+            {% with adj_val=val|floatformat:"-1" %}
             <button
                 type="button"
                 hx-post="{% url 'meal_cell_update' %}"
@@ -12,13 +15,52 @@
                     "meal_type": "{{ meal_type }}",
                     "value": "{{ val }}"
                 }'
-                hx-target="#cell-{{ mc.id }}-{{ meal_type }}"
-                class="meal-btn{% if current_val and current_val == val %} active{% endif %}"
+                hx-target="#{{ cell_prefix }}{{ mc.id }}-{{ meal_type }}"
+                hx-swap="innerHTML"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token_for_htmx|default:"" }}"}'
+                class="meal-btn{% if current_val|floatformat:"-1" == adj_val %} active{% endif %}"
             >{{ label }}</button>
             {% endwith %}
         {% endfor %}
     </div>
-    {% if cell_error %}
-        <div class="cell-error">{{ cell_error }}</div>
-    {% endif %}
-</td>
+    <div class="meal-stepper">
+        <button
+            type="button"
+            hx-post="{% url 'meal_cell_update' %}"
+            hx-vals='{
+                "member_cycle_id": "{{ mc.id }}",
+                "entry_date": "{{ entry_date|date:"Y-m-d" }}",
+                "meal_type": "{{ meal_type }}",
+                "value": "{{ sv.minus }}"
+            }'
+            hx-target="#{{ cell_prefix }}{{ mc.id }}-{{ meal_type }}"
+            hx-swap="innerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token_for_htmx|default:"" }}"}'
+            class="stepper-btn{% if current_val|floatformat:"-1" == "0" %} disabled{% endif %}"
+            {% if current_val|floatformat:"-1" == "0" %}disabled{% endif %}
+        >–</button>
+        <span class="stepper-value">{{ current_val }}</span>
+        <button
+            type="button"
+            hx-post="{% url 'meal_cell_update' %}"
+            hx-vals='{
+                "member_cycle_id": "{{ mc.id }}",
+                "entry_date": "{{ entry_date|date:"Y-m-d" }}",
+                "meal_type": "{{ meal_type }}",
+                "value": "{{ sv.plus }}"
+            }'
+            hx-target="#{{ cell_prefix }}{{ mc.id }}-{{ meal_type }}"
+            hx-swap="innerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token_for_htmx|default:"" }}"}'
+            class="stepper-btn"
+        >+</button>
+        {% if guest_count > 0 %}
+            <span class="guest-badge" aria-label="{{ guest_count }} guest meal">👤+{{ guest_count }}</span>
+        {% endif %}
+    </div>
+</div>
+{% if cell_error %}
+    <div class="cell-error">{{ cell_error }}</div>
+{% endif %}
+{% endwith %}
+{% endwith %}

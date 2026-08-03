@@ -11,6 +11,19 @@ def open_cycle():
     return Cycle.objects.filter(status='open').first()
 
 
+def _selected_cycle(request):
+    mode = request.GET.get('cycle')
+    if mode == 'previous':
+        closed = Cycle.objects.filter(status='closed').order_by('-start_date').first()
+        if closed:
+            return closed, 'previous'
+    return Cycle.objects.filter(status='open').first(), 'current'
+
+
+def _has_previous():
+    return Cycle.objects.filter(status='closed').exists()
+
+
 def _bills_for(cycle):
     if not cycle:
         return FixedBill.objects.none()
@@ -22,7 +35,7 @@ def _bills_for(cycle):
     )
 
 
-def _ctx(cycle, bills, form, editing_bill, editing):
+def _ctx(cycle, bills, form, editing_bill, editing, cycle_mode='current', is_current=True):
     return {
         'current_cycle': cycle,
         'has_cycle': cycle is not None,
@@ -30,15 +43,19 @@ def _ctx(cycle, bills, form, editing_bill, editing):
         'bill_form': form,
         'editing_bill': editing_bill,
         'is_editing': editing,
+        'cycle_mode': cycle_mode,
+        'has_previous': _has_previous(),
+        'is_current_cycle': is_current,
     }
 
 
 @login_required
 def bill_list(request):
-    c = open_cycle()
+    c, cycle_mode = _selected_cycle(request)
     bills = _bills_for(c)
-    form = FixedBillForm(cycle=c) if c else FixedBillForm()
-    return render(request, 'bills/bill_list.html', _ctx(c, bills, form, None, False))
+    is_current = c and c.status == 'open'
+    form = FixedBillForm(cycle=c) if is_current else None
+    return render(request, 'bills/bill_list.html', _ctx(c, bills, form, None, False, cycle_mode, is_current))
 
 
 @login_required
@@ -61,7 +78,7 @@ def bill_add(request):
         )
         return redirect('fixed_bill_list')
     return render(
-        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, None, False)
+        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, None, False, 'current', True)
     )
 
 
@@ -71,7 +88,7 @@ def bill_edit(request, bill_id):
     c = bill.cycle
     form = FixedBillForm(request.POST or None, instance=bill, cycle=c)
     return render(
-        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, bill, True)
+        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, bill, True, 'current', True)
     )
 
 
@@ -85,7 +102,7 @@ def bill_update(request, bill_id):
         messages.success(request, "Fixed bill updated.")
         return redirect('fixed_bill_list')
     return render(
-        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, bill, True)
+        request, 'bills/bill_list.html', _ctx(c, _bills_for(c), form, bill, True, 'current', True)
     )
 
 

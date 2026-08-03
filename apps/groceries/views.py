@@ -13,12 +13,26 @@ def open_cycle():
     return Cycle.objects.filter(status='open').first()
 
 
+def _selected_cycle(request):
+    mode = request.GET.get('cycle')
+    if mode == 'previous':
+        closed = Cycle.objects.filter(status='closed').order_by('-start_date').first()
+        if closed:
+            return closed, 'previous'
+    return Cycle.objects.filter(status='open').first(), 'current'
+
+
+def _has_previous():
+    return Cycle.objects.filter(status='closed').exists()
+
+
 @login_required
 def bill_list(request):
-    c = open_cycle()
+    c, cycle_mode = _selected_cycle(request)
     bills = _bills_for(c)
-    form = GroceryBillForm(cycle=c) if c else GroceryBillForm()
-    return render(request, 'groceries/bill_list.html', _ctx(c, bills, form, None, False))
+    is_current = c and c.status == 'open'
+    form = GroceryBillForm(cycle=c) if is_current else None
+    return render(request, 'groceries/bill_list.html', _ctx(c, bills, form, None, False, cycle_mode, is_current))
 
 
 @login_required
@@ -36,7 +50,7 @@ def bill_add(request):
         _mismatch_note(request, bill)
         messages.success(request, f"Grocery bill of \u20b9{bill.total_amount} saved.")
         return redirect('bill_list')
-    return render(request, 'groceries/bill_list.html', _ctx(c, _bills_for(c), form, None, False))
+    return render(request, 'groceries/bill_list.html', _ctx(c, _bills_for(c), form, None, False, 'current', True))
 
 
 @login_required
@@ -44,7 +58,7 @@ def bill_edit(request, bill_id):
     bill = get_object_or_404(GroceryBill, pk=bill_id)
     c = bill.cycle
     form = GroceryBillForm(request.POST or None, instance=bill, cycle=c)
-    return render(request, 'groceries/bill_list.html', _ctx(c, _bills_for(c), form, bill, True))
+    return render(request, 'groceries/bill_list.html', _ctx(c, _bills_for(c), form, bill, True, 'current', True))
 
 
 @login_required
@@ -60,7 +74,7 @@ def bill_update(request, bill_id):
         _mismatch_note(request, bill)
         messages.success(request, "Grocery bill updated.")
         return redirect('bill_list')
-    return render(request, 'groceries/bill_list.html', _ctx(c, _bills_for(c), form, bill, True))
+    return render(request, 'groceries/bill_list.html', _ctx(c, _bills_for(c), form, bill, True, 'current', True))
 
 
 @login_required
@@ -75,10 +89,11 @@ def bill_delete(request, bill_id):
 
 @login_required
 def extra_list(request):
-    c = open_cycle()
+    c, cycle_mode = _selected_cycle(request)
     extras = _extras_for(c)
-    form = ExtraGroceryForm(cycle=c) if c else ExtraGroceryForm()
-    return render(request, 'groceries/extra_list.html', _extra_ctx(c, extras, form, None, False))
+    is_current = c and c.status == 'open'
+    form = ExtraGroceryForm(cycle=c) if is_current else None
+    return render(request, 'groceries/extra_list.html', _extra_ctx(c, extras, form, None, False, cycle_mode, is_current))
 
 
 @login_required
@@ -94,7 +109,7 @@ def extra_add(request):
         extra.save()
         messages.success(request, f"Extra grocery '{extra.product_name}' saved.")
         return redirect('extra_list')
-    return render(request, 'groceries/extra_list.html', _extra_ctx(c, _extras_for(c), form, None, False))
+    return render(request, 'groceries/extra_list.html', _extra_ctx(c, _extras_for(c), form, None, False, 'current', True))
 
 
 @login_required
@@ -102,7 +117,7 @@ def extra_edit(request, extra_id):
     extra = get_object_or_404(ExtraGrocery, pk=extra_id)
     c = extra.cycle
     form = ExtraGroceryForm(request.POST or None, instance=extra, cycle=c)
-    return render(request, 'groceries/extra_list.html', _extra_ctx(c, _extras_for(c), form, extra, True))
+    return render(request, 'groceries/extra_list.html', _extra_ctx(c, _extras_for(c), form, extra, True, 'current', True))
 
 
 @login_required
@@ -114,7 +129,7 @@ def extra_update(request, extra_id):
         form.save()
         messages.success(request, "Extra grocery entry updated.")
         return redirect('extra_list')
-    return render(request, 'groceries/extra_list.html', _extra_ctx(c, _extras_for(c), form, extra, True))
+    return render(request, 'groceries/extra_list.html', _extra_ctx(c, _extras_for(c), form, extra, True, 'current', True))
 
 
 @login_required
@@ -150,7 +165,7 @@ def _extras_for(cycle):
     )
 
 
-def _ctx(cycle, bills, form, editing_bill, editing):
+def _ctx(cycle, bills, form, editing_bill, editing, cycle_mode='current', is_current=True):
     return {
         'current_cycle': cycle,
         'has_cycle': cycle is not None,
@@ -159,10 +174,13 @@ def _ctx(cycle, bills, form, editing_bill, editing):
         'editing_bill': editing_bill,
         'is_editing': editing,
         'member_options': member_choices_json(cycle),
+        'cycle_mode': cycle_mode,
+        'has_previous': _has_previous(),
+        'is_current_cycle': is_current,
     }
 
 
-def _extra_ctx(cycle, extras, form, editing_extra, editing):
+def _extra_ctx(cycle, extras, form, editing_extra, editing, cycle_mode='current', is_current=True):
     return {
         'current_cycle': cycle,
         'has_cycle': cycle is not None,
@@ -171,6 +189,9 @@ def _extra_ctx(cycle, extras, form, editing_extra, editing):
         'editing_extra': editing_extra,
         'is_editing': editing,
         'member_options': member_choices_json(cycle),
+        'cycle_mode': cycle_mode,
+        'has_previous': _has_previous(),
+        'is_current_cycle': is_current,
     }
 
 

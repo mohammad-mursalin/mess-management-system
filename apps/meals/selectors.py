@@ -39,3 +39,37 @@ def get_daily_counts(entry_date):
         'lunch_count': int(lunch_raw),
         'dinner_count': int(dinner_raw),
     }
+
+
+def member_own_meals_for_cycle(member_cycle):
+    entries = member_cycle.meal_entries.all()
+    total = Decimal('0')
+    for entry in entries:
+        total += member_units(entry.breakfast, 'breakfast')
+        total += member_units(entry.lunch, 'lunch')
+        total += member_units(entry.dinner, 'dinner')
+    return total
+
+
+def member_guest_meals_for_cycle(member_cycle):
+    entries = member_cycle.meal_entries.all()
+    total = Decimal('0')
+    for entry in entries:
+        total += guest_units(entry.breakfast, 'breakfast')
+        total += guest_units(entry.lunch, 'lunch')
+        total += guest_units(entry.dinner, 'dinner')
+    return total
+
+
+def total_member_meals_for_cycle(cycle):
+    total = Decimal('0')
+    for mc in cycle.member_cycles.select_related('member').all():
+        total += member_own_meals_for_cycle(mc)
+    return total
+
+
+def total_guest_meals_for_cycle(cycle):
+    total = Decimal('0')
+    for mc in cycle.member_cycles.select_related('member').all():
+        total += member_guest_meals_for_cycle(mc)
+    return total

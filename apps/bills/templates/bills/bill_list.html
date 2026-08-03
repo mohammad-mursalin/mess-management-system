@@ -6,6 +6,17 @@
     <h1>Fixed Bills</h1>
 </div>
 
+{% if has_previous %}
+<nav class="tab-nav">
+    <a href="?cycle=current" class="{% if cycle_mode == 'current' %}active{% endif %}">
+        Current Cycle
+    </a>
+    <a href="?cycle=previous" class="{% if cycle_mode == 'previous' %}active{% endif %}">
+        Previous Cycle
+    </a>
+</nav>
+{% endif %}
+
 {% if not has_cycle %}
     <div class="notice notice-warn">
         No open cycle. Open one in the Cycles admin before logging fixed bills.
@@ -22,7 +33,7 @@
     {% endfor %}
 {% endif %}
 
-<div class="card {% if not has_cycle %}disabled-overlay{% endif %}">
+<div class="card {% if not has_cycle or not is_current_cycle %}disabled-overlay{% endif %}">
     <div class="card-title">{{ editing_bill|yesno:"Edit Fixed Bill,Add Fixed Bill" }}</div>
 
     {% if editing_bill %}

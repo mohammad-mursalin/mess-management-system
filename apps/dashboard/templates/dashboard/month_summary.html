@@ -1,4 +1,4 @@
-{% extends 'base_manager.html' %}
+{% extends 'base_public.html' %}
 {% load dashboard_extras %}
 {% block title %}Month Summary{% endblock %}
 
@@ -17,56 +17,109 @@
         </span>
     </div>
 
+    {% if has_previous %}
+    <nav class="tab-nav">
+        <a href="?cycle=current" class="{% if cycle_mode == 'current' %}active{% endif %}">
+            Current Cycle ({{ current_cycle.label }})
+        </a>
+        <a href="?cycle=previous" class="{% if cycle_mode == 'previous' %}active{% endif %}">
+            Previous Cycle
+        </a>
+    </nav>
+    {% endif %}
+
+    {% if no_meals_logged %}
     <div class="summary-banner">
         <span class="icon">&#9888;</span>
-        Due/refund calculation not yet configured.
+        No meals logged this cycle — cannot calculate rates.
     </div>
+    {% else %}
+    {% if is_estimated %}
+    <div class="summary-banner estimated-banner">
+        <span class="icon">&#128260;</span>
+        Estimated — cycle still open.
+    </div>
+    {% else %}
+    <div class="summary-banner final-banner">
+        <span class="icon">&#10003;</span>
+        Final numbers — cycle closed.
+    </div>
+    {% endif %}
 
-    <section class="totals-grid">
-        <div class="total-card">
-            <div class="total-label">Total Grocery Spend</div>
-            <div class="total-amount">৳{{ total_grocery }}</div>
+    <section class="rates-block">
+        <div class="rate-item">
+            <span class="rate-label">Actual Meal Rate</span>
+            <span class="rate-value">৳{{ actual_meal_rate|floatformat:2 }}/meal</span>
         </div>
-        <div class="total-card">
-            <div class="total-label">Total Extra Grocery Spend</div>
-            <div class="total-amount">৳{{ total_extra_grocery }}</div>
+        {% if not user.is_authenticated %}
+        <div class="rate-item">
+            <span class="rate-label">Fixed Member Rate</span>
+            <span class="rate-value">৳{{ fixed_member_rate|floatformat:2 }}/meal</span>
         </div>
-        <div class="total-card">
-            <div class="total-label">Total Fixed Bills</div>
-            <div class="total-amount">৳{{ total_fixed_bills }}</div>
+        {% endif %}
+        <div class="rate-item">
+            <span class="rate-label">Total Meals</span>
+            <span class="rate-value">{{ total_meals|floatformat:1 }} ({{ total_member_meals|floatformat:1 }} member + {{ total_guest_meals|floatformat:1 }} guest)</span>
         </div>
-        <div class="total-card">
-            <div class="total-label">Total Meals Eaten</div>
-            <div class="total-amount">{{ total_meals }}</div>
+        <div class="rate-item">
+            <span class="rate-label">Total Grocery Bill</span>
+            <span class="rate-value">৳{{ total_grocery|floatformat:2 }}</span>
         </div>
     </section>
 
+    {% if is_estimated and user.is_authenticated %}
+    <section class="rate-edit-section">
+        <form method="post" action="{% url 'update_fixed_member_rate' %}" class="rate-edit-form">
+            {% csrf_token %}
+            <input type="hidden" name="cycle_id" value="{{ current_cycle.id }}">
+            <label for="fixed_member_rate">Fixed Member Rate (৳/meal):</label>
+            <input type="number" step="0.01" min="0" id="fixed_member_rate" name="fixed_member_rate" class="form-input" value="{{ fixed_member_rate|floatformat:2 }}">
+            <button type="submit" class="btn btn-primary">Update Rate</button>
+        </form>
+    </section>
+    {% endif %}
+
     <section class="meals-section">
-        <h2>Meals Eaten Per Member</h2>
+        <h2>Member Dues &amp; Refunds</h2>
+        {% if member_due_rows %}
         <div class="table-view">
             <div class="table-wrap">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th class="numeric">Breakfast</th>
-                            <th class="numeric">Lunch</th>
-                            <th class="numeric">Dinner</th>
-                            <th class="numeric">Total</th>
+                            <th>Member</th>
+                            <th class="numeric">Own Meals</th>
+                            <th class="numeric">Guest Meals</th>
+                            {% if is_estimated %}
+                            <th class="numeric">Meal Expense</th>
+                            <th class="numeric">Extra Bill Share</th>
+                            {% endif %}
+                            <th class="numeric">Total Expense</th>
+                            <th class="numeric">Deposit</th>
+                            <th class="numeric">Balance</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for m in member_meals %}
+                        {% for row in member_due_rows %}
                         <tr>
-                            <td>{{ m.name }}</td>
-                            <td class="numeric">{{ m.breakfast|format_meal_value }}</td>
-                            <td class="numeric">{{ m.lunch|format_meal_value }}</td>
-                            <td class="numeric">{{ m.dinner|format_meal_value }}</td>
-                            <td class="numeric">{{ m.total|format_meal_value }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="empty-row">No members in the current cycle.</td>
+                            <td>{{ row.name }}</td>
+                            <td class="numeric">{{ row.own_meals|floatformat:1 }}</td>
+                            <td class="numeric">{{ row.guest_meals|floatformat:1 }}</td>
+                            {% if is_estimated %}
+                            <td class="numeric">৳{{ row.meal_expense|floatformat:2 }}</td>
+                            <td class="numeric">৳{{ row.extra_bill_share|floatformat:2 }}</td>
+                            {% endif %}
+                            <td class="numeric">৳{{ row.total_expense|floatformat:2 }}</td>
+                            <td class="numeric">৳{{ row.deposit|floatformat:2 }}</td>
+                            <td class="numeric">
+                                {% if row.balance > 0 %}
+                                <span class="text-success">৳{{ row.balance|floatformat:2 }}</span>
+                                {% elif row.balance < 0 %}
+                                <span class="text-danger">৳{{ row.balance|floatformat:2|cut:"-" }}</span>
+                                {% else %}
+                                ৳0.00
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -75,35 +128,71 @@
         </div>
 
         <div class="card-view">
-            {% for m in member_meals %}
+            {% for row in member_due_rows %}
             <div class="list-card">
-                <div class="card-primary">{{ m.name }}</div>
+                <div class="card-primary">{{ row.name }}</div>
                 <div class="card-field">
-                    <span class="card-field-label">Breakfast</span>
-                    <span class="card-field-value">{{ m.breakfast|format_meal_value }}</span>
+                    <span class="card-field-label">Own Meals</span>
+                    <span class="card-field-value">{{ row.own_meals|floatformat:1 }}</span>
                 </div>
                 <div class="card-field">
-                    <span class="card-field-label">Lunch</span>
-                    <span class="card-field-value">{{ m.lunch|format_meal_value }}</span>
+                    <span class="card-field-label">Guest Meals</span>
+                    <span class="card-field-value">{{ row.guest_meals|floatformat:1 }}</span>
+                </div>
+                {% if is_estimated %}
+                <div class="card-field">
+                    <span class="card-field-label">Meal Expense</span>
+                    <span class="card-field-value">৳{{ row.meal_expense|floatformat:2 }}</span>
                 </div>
                 <div class="card-field">
-                    <span class="card-field-label">Dinner</span>
-                    <span class="card-field-value">{{ m.dinner|format_meal_value }}</span>
+                    <span class="card-field-label">Extra Bill Share</span>
+                    <span class="card-field-value">৳{{ row.extra_bill_share|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="card-field">
+                    <span class="card-field-label">Total Expense</span>
+                    <span class="card-field-value">৳{{ row.total_expense|floatformat:2 }}</span>
                 </div>
                 <div class="card-field">
-                    <span class="card-field-label">Total</span>
-                    <span class="card-field-value">{{ m.total|format_meal_value }}</span>
+                    <span class="card-field-label">Deposit</span>
+                    <span class="card-field-value">৳{{ row.deposit|floatformat:2 }}</span>
                 </div>
-            </div>
-            {% empty %}
-            <div class="list-card">
-                <div class="card-primary" style="text-align: center; color: var(--color-text-muted);">
-                    No members in the current cycle.
+                <div class="card-field">
+                    <span class="card-field-label">Balance</span>
+                    <span class="card-field-value">
+                        {% if row.balance > 0 %}
+                        <span class="text-success">৳{{ row.balance|floatformat:2 }}</span>
+                        {% elif row.balance < 0 %}
+                        <span class="text-danger">৳{{ row.balance|floatformat:2|cut:"-" }}</span>
+                        {% else %}
+                        ৳0.00
+                        {% endif %}
+                    </span>
                 </div>
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="no-cycle">
+            <p>No members in the current cycle.</p>
+        </div>
+        {% endif %}
     </section>
+
+    <section class="summary-section">
+        <h2>Summary</h2>
+        <div class="totals-grid">
+            <div class="total-card">
+                <div class="total-label">Total Members Owe Manager</div>
+                <div class="total-amount">৳{{ total_balance_negative|floatformat:2 }}</div>
+            </div>
+            <div class="total-card">
+                <div class="total-label">Total Manager Owes Members</div>
+                <div class="total-amount">৳{{ total_balance_positive|floatformat:2 }}</div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
     {% else %}
     <div class="no-cycle">
         <p>No open cycle found.</p>

@@ -1,0 +1,147 @@
+{% extends 'base_public.html' %}
+{% load dashboard_extras %}
+{% block title %}Meal History{% endblock %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+    {% if current_cycle %}
+    <div class="summary-header">
+        <h1>Meal History</h1>
+        <span class="cycle-label">
+            {{ current_cycle.label }}
+            <span class="badge badge-{{ current_cycle.status }}">
+                {{ current_cycle.status }}
+            </span>
+        </span>
+    </div>
+
+    {% if has_previous %}
+    <nav class="tab-nav">
+        <a href="?cycle=current{% if selected_member %}&member={{ selected_member.id }}{% endif %}" class="{% if cycle_mode == 'current' %}active{% endif %}">
+            Current Cycle ({{ current_cycle.label }})
+        </a>
+        <a href="?cycle=previous{% if selected_member %}&member={{ selected_member.id }}{% endif %}" class="{% if cycle_mode == 'previous' %}active{% endif %}">
+            Previous Cycle
+        </a>
+    </nav>
+    {% endif %}
+
+    <form method="get" class="member-select-form">
+        <label for="member_select">Select Member:</label>
+        <select name="member" id="member_select" onchange="this.form.submit()">
+            <option value="">-- Choose a member --</option>
+            {% for m in all_members %}
+            <option value="{{ m.id }}" {% if selected_member and m.id == selected_member.id %}selected{% endif %}>
+                {{ m.name }}
+            </option>
+            {% endfor %}
+        </select>
+        {% if selected_member %}
+        <input type="hidden" name="cycle" value="{{ cycle_mode }}">
+        {% endif %}
+    </form>
+
+    {% if selected_member %}
+    <section class="meal-history-section">
+        <h2>{{ selected_member.name }} — {{ current_cycle.label }}</h2>
+        {% if entries %}
+        <div class="table-view">
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th class="numeric">Breakfast</th>
+                            <th class="numeric">Lunch</th>
+                            <th class="numeric">Dinner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in entries %}
+                        <tr class="{% if not item.entry %}muted-row{% endif %}">
+                            <td>{{ item.date|date:"M j, Y" }}</td>
+                            <td class="numeric">
+                                {% if item.entry %}
+                                {{ item.entry.breakfast|format_meal_value }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                            <td class="numeric">
+                                {% if item.entry %}
+                                {{ item.entry.lunch|format_meal_value }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                            <td class="numeric">
+                                {% if item.entry %}
+                                {{ item.entry.dinner|format_meal_value }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-view">
+            {% for item in entries %}
+            <div class="list-card {% if not item.entry %}muted-row{% endif %}">
+                <div class="card-primary">{{ item.date|date:"M j, Y" }}</div>
+                <div class="card-field">
+                    <span class="card-field-label">Breakfast</span>
+                    <span class="card-field-value">
+                        {% if item.entry %}
+                        {{ item.entry.breakfast|format_meal_value }}
+                        {% else %}
+                        <span class="muted">—</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Lunch</span>
+                    <span class="card-field-value">
+                        {% if item.entry %}
+                        {{ item.entry.lunch|format_meal_value }}
+                        {% else %}
+                        <span class="muted">—</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="card-field">
+                    <span class="card-field-label">Dinner</span>
+                    <span class="card-field-value">
+                        {% if item.entry %}
+                        {{ item.entry.dinner|format_meal_value }}
+                        {% else %}
+                        <span class="muted">—</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-cycle">
+            <p>No meal entries found for {{ selected_member.name }} in this cycle.</p>
+        </div>
+        {% endif %}
+    </section>
+    {% else %}
+    <div class="no-cycle">
+        <p>Select a member above to view their meal history.</p>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="no-cycle">
+        <p>No cycle found.</p>
+        <p>Open a cycle in the Cycles admin to view meal history.</p>
+    </div>
+    {% endif %}
+{% endblock %}

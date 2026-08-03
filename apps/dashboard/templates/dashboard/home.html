@@ -16,6 +16,11 @@
         <span class="count-item"><span class="count-icon" aria-label="Dinner count: {{ today_counts.dinner_count }}">🌙</span><span class="count-num">{{ today_counts.dinner_count }}</span></span>
     </section>
 
+    <nav class="public-nav">
+        <a href="{% url 'month_summary' %}" class="btn btn-ghost">View Month Summary</a>
+        <a href="{% url 'meal_history' %}" class="btn btn-ghost">Meal History</a>
+    </nav>
+
     <section class="meal-status-section">
         <h2>Today's Meal Status — {{ today|date:"M j, Y" }}</h2>
         <div class="meal-status-list">

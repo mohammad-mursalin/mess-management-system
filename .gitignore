@@ -10,5 +10,9 @@ venv/
 env/
 ENV/
 *.log
-manage.py
 *.sqlite3
+*.png
+.playwright-mcp/
+
+trash
+tests

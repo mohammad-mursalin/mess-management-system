@@ -69,10 +69,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database — read DATABASE_URL from env (neon/postgres in prod, sqlite locally)
-DATABASES = {
-    'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
-}
+# Security — env-driven so they can be set on Render without code changes.
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+
+# Database — use DATABASE_URL from .env when set to a real value,
+# otherwise fall back to local SQLite for development and testing.
+_database_url = env('DATABASE_URL', default='').strip()
+if _database_url and not _database_url.startswith('postgres://user:password@'):
+    DATABASES = {'default': env.db()}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation

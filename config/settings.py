@@ -27,12 +27,12 @@ INSTALLED_APPS = [
 
     'django_htmx',
 
-    'cycles.apps.CyclesConfig',
-    'members.apps.MembersConfig',
-    'meals.apps.MealsConfig',
-    'groceries.apps.GroceriesConfig',
-    'bills.apps.BillsConfig',
-    'dashboard.apps.DashboardConfig',
+    'apps.cycles.apps.CyclesConfig',
+    'apps.members.apps.MembersConfig',
+    'apps.meals.apps.MealsConfig',
+    'apps.groceries.apps.GroceriesConfig',
+    'apps.bills.apps.BillsConfig',
+    'apps.dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [

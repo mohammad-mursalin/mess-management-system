@@ -7,7 +7,9 @@
 
 {% block content %}
     <div class="dashboard-updated">
+        {% if last_updated %}
         Last updated: {{ last_updated|date:"M d, Y \a\t g:i A" }}
+        {% endif %}
     </div>
 
     <section class="today-counts-inline">
@@ -21,6 +23,7 @@
         <a href="{% url 'meal_history' %}" class="btn btn-ghost">Meal History</a>
     </nav>
 
+    {% if current_cycle %}
     <section class="meal-status-section">
         <h2>Today's Meal Status — {{ today|date:"M j, Y" }}</h2>
         <div class="meal-status-list">
@@ -119,6 +122,12 @@
             {% endfor %}
         </div>
     </section>
+    {% else %}
+    <div class="no-cycle">
+        <p>No active cycle yet.</p>
+        <p>Check back once the manager sets one up.</p>
+    </div>
+    {% endif %}
 {% endblock %}
 
 {% block footer %}

@@ -22,6 +22,7 @@ def home(request):
 
     last_updated = None
     members = []
+    today_meal_status = []
 
     if cycle:
         last_updated = (

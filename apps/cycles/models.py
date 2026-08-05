@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -16,6 +17,25 @@ class Cycle(models.Model):
 
     class Meta:
         ordering = ['-start_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['status'],
+                condition=models.Q(status='open'),
+                name='unique_open_cycle',
+            ),
+        ]
 
     def __str__(self):
         return self.label
+
+    def clean(self):
+        if self.status == 'open':
+            existing = Cycle.objects.filter(status='open').exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError(
+                    'Close the current open cycle before opening a new one.'
+                )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

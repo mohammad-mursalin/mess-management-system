@@ -2,7 +2,7 @@ from datetime import date
 
 from django import forms
 
-from members.models import Member, MemberCycle
+from apps.members.models import Member, MemberCycle
 from .models import GroceryBill, ExtraGrocery
 
 

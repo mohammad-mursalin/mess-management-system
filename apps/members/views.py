@@ -6,7 +6,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
-from cycles.models import Cycle
+from apps.cycles.models import Cycle
 from .forms import AddMemberForm, EditMemberForm
 from .models import Member, MemberCycle
 

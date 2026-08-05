@@ -1,4 +1,4 @@
-from cycles.models import Cycle
+from apps.cycles.models import Cycle
 
 
 def current_cycle(request):

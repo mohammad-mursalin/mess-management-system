@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from members.models import Member
+from apps.members.models import Member
 from .models import GroceryBillItem
 
 

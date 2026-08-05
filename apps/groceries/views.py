@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from cycles.models import Cycle
+from apps.cycles.models import Cycle
 from .models import GroceryBill, ExtraGrocery
 from .forms import GroceryBillForm, ExtraGroceryForm
 from .utils import sync_bill_items, member_choices_json

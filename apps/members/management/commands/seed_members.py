@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
-from cycles.models import Cycle
-from members.models import Member, MemberCycle
+from apps.cycles.models import Cycle
+from apps.members.models import Member, MemberCycle
 
 
 NAMES = [

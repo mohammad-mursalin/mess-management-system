@@ -10,10 +10,10 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
-from cycles.models import Cycle
-from members.models import MemberCycle
-from meals.models import MealEntry
-from meals.selectors import get_daily_counts
+from apps.cycles.models import Cycle
+from apps.members.models import MemberCycle
+from apps.meals.models import MealEntry
+from apps.meals.selectors import get_daily_counts
 
 
 def logout_view(request):

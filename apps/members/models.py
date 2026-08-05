@@ -31,7 +31,7 @@ class MemberCycle(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.join_date and self.cycle_id:
-            from cycles.models import Cycle
+            from apps.cycles.models import Cycle
             try:
                 cycle = Cycle.objects.only('start_date').get(pk=self.cycle_id)
                 self.join_date = cycle.start_date

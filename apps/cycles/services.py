@@ -4,16 +4,16 @@ from django.db import transaction
 from django.db.models import F, Sum
 from django.utils import timezone
 
-from meals.selectors import (
+from apps.meals.selectors import (
     member_guest_meals_for_cycle,
     member_own_meals_for_cycle,
     total_guest_meals_for_cycle,
     total_member_meals_for_cycle,
 )
-from groceries.models import GroceryBill, ExtraGrocery
-from bills.models import FixedBill
+from apps.groceries.models import GroceryBill, ExtraGrocery
+from apps.bills.models import FixedBill
 from .models import Cycle
-from members.models import MemberCycle
+from apps.members.models import MemberCycle
 
 
 def compute_cycle_due(cycle):

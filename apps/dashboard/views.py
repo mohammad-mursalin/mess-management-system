@@ -4,13 +4,13 @@ from django.db.models import F, Sum
 from django.shortcuts import render
 from django.utils import timezone
 
-from cycles.models import Cycle
-from cycles.services import compute_cycle_due
-from groceries.models import GroceryBill, ExtraGrocery
-from bills.models import FixedBill
-from meals.selectors import get_daily_counts, member_guest_meals_for_cycle, member_own_meals_for_cycle
-from meals.models import MealEntry
-from members.models import Member, MemberCycle
+from apps.cycles.models import Cycle
+from apps.cycles.services import compute_cycle_due
+from apps.groceries.models import GroceryBill, ExtraGrocery
+from apps.bills.models import FixedBill
+from apps.meals.selectors import get_daily_counts, member_guest_meals_for_cycle, member_own_meals_for_cycle
+from apps.meals.models import MealEntry
+from apps.members.models import Member, MemberCycle
 from decimal import Decimal
 
 

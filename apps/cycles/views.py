@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404
 
-from cycles.models import Cycle
-from cycles.services import update_fixed_member_rate
+from apps.cycles.models import Cycle
+from apps.cycles.services import update_fixed_member_rate
 
 
 @login_required

@@ -74,7 +74,7 @@ def bill_add(request):
         bill.save()
         messages.success(
             request,
-            f"Fixed bill ({bill.get_bill_type_display()}) of \u20b9{bill.amount} saved.",
+            f"Fixed bill ({bill.get_bill_type_display()}) of ৳{bill.amount} saved.",
         )
         return redirect('fixed_bill_list')
     return render(
@@ -113,5 +113,5 @@ def bill_delete(request, bill_id):
         label = bill.get_bill_type_display()
         amount = bill.amount
         bill.delete()
-        messages.success(request, f"Deleted {label} bill of \u20b9{amount}.")
+        messages.success(request, f"Deleted {label} bill of ৳{amount}.")
     return redirect('fixed_bill_list')

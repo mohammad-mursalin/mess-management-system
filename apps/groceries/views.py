@@ -48,7 +48,7 @@ def bill_add(request):
         bill.save()
         sync_bill_items(bill, request.POST)
         _mismatch_note(request, bill)
-        messages.success(request, f"Grocery bill of \u20b9{bill.total_amount} saved.")
+        messages.success(request, f"Grocery bill of ৳{bill.total_amount} saved.")
         return redirect('bill_list')
     return render(request, 'groceries/bill_list.html', _ctx(c, _bills_for(c), form, None, False, 'current', True))
 
@@ -83,7 +83,7 @@ def bill_delete(request, bill_id):
     if request.method == 'POST':
         amount = bill.total_amount
         bill.delete()
-        messages.success(request, f"Deleted grocery bill of \u20b9{amount}.")
+        messages.success(request, f"Deleted grocery bill of ৳{amount}.")
     return redirect('bill_list')
 
 
@@ -200,5 +200,5 @@ def _mismatch_note(request, bill):
         items_total = bill.items_total()
         messages.info(
             request,
-            f"Itemized total (\u20b9{items_total}) differs from total_amount (\u20b9{bill.total_amount}); total_amount kept as authoritative.",
+            f"Itemized total (৳{items_total}) differs from total_amount (৳{bill.total_amount}); total_amount kept as authoritative.",
         )

@@ -66,7 +66,7 @@
         <div class="form-group">
             <label for="{{ bill_form.description.id_for_label }}">Description</label>
             {{ bill_form.description }}
-            <div class="hint">Required when Bill Type is <em>Other</em>. Optional for Rice, Electricity, Chef, and Wifi.</div>
+            <div class="hint">Required when Bill Type is <em>Other</em>. Optional for Electricity, Chef, Wifi, Gas, and Garbage.</div>
             {% if bill_form.description.errors %}<div class="field-error">{{ bill_form.description.errors }}</div>{% endif %}
         </div>
 

@@ -4,10 +4,11 @@ from django.db import models
 
 class FixedBill(models.Model):
     BILL_TYPE_CHOICES = [
-        ('rice', 'Rice'),
         ('electricity', 'Electricity'),
         ('chef', 'Chef'),
         ('wifi', 'Wifi'),
+        ('gas', 'Gas'),
+        ('garbage', 'Garbage'),
         ('other', 'Other'),
     ]
 

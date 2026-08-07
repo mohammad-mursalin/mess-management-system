@@ -65,6 +65,14 @@
             <span class="rate-label">Total Grocery Bill</span>
             <span class="rate-value">৳{{ total_grocery|floatformat:2 }}</span>
         </div>
+        <div class="rate-item">
+            <span class="rate-label">Total Extra Grocery</span>
+            <span class="rate-value">৳{{ total_extra_grocery|floatformat:2 }}</span>
+        </div>
+        <div class="rate-item">
+            <span class="rate-label">Total Fixed Bills</span>
+            <span class="rate-value">৳{{ total_fixed_bills|floatformat:2 }}</span>
+        </div>
     </section>
 
     {% if is_estimated and user.is_authenticated %}

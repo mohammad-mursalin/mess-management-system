@@ -103,6 +103,9 @@ def month_summary(request):
     total_grocery = Decimal('0')
     total_extra_grocery = Decimal('0')
     total_fixed_bills = Decimal('0')
+    total_deposits = Decimal('0')
+    total_spent = Decimal('0')
+    manager_balance = Decimal('0')
     member_due_rows = []
     is_estimated = False
     no_meals_logged = False
@@ -132,6 +135,11 @@ def month_summary(request):
             total=Sum('amount')
         )
         total_fixed_bills = fixed_agg['total'] or Decimal('0')
+
+        deposit_agg = MemberCycle.objects.filter(cycle=cycle).aggregate(
+            total=Sum('deposit_amount')
+        )
+        total_deposits = deposit_agg['total'] or Decimal('0')
 
         if cycle.status == 'open':
             is_estimated = True
@@ -189,6 +197,9 @@ def month_summary(request):
                 elif balance > 0:
                     total_balance_positive += balance
 
+        total_spent = total_grocery + total_extra_grocery + total_fixed_bills
+        manager_balance = total_deposits - total_spent
+
     return render(request, 'dashboard/month_summary.html', {
         'current_cycle': cycle,
         'cycle_mode': cycle_mode,
@@ -196,6 +207,9 @@ def month_summary(request):
         'total_grocery': total_grocery,
         'total_extra_grocery': total_extra_grocery,
         'total_fixed_bills': total_fixed_bills,
+        'total_deposits': total_deposits,
+        'total_spent': total_spent,
+        'manager_balance': manager_balance,
         'member_due_rows': member_due_rows,
         'is_estimated': is_estimated,
         'no_meals_logged': no_meals_logged,

@@ -75,6 +75,21 @@
         </div>
     </section>
 
+    <section class="rates-block">
+        <div class="rate-item">
+            <span class="rate-label">Total Deposits</span>
+            <span class="rate-value">৳{{ total_deposits|floatformat:2 }}</span>
+        </div>
+        <div class="rate-item">
+            <span class="rate-label">Total Spent</span>
+            <span class="rate-value">৳{{ total_spent|floatformat:2 }}</span>
+        </div>
+        <div class="rate-item">
+            <span class="rate-label">Manager Balance</span>
+            <span class="rate-value">৳{{ manager_balance|floatformat:2 }}</span>
+        </div>
+    </section>
+
     {% if is_estimated and user.is_authenticated %}
     <section class="rate-edit-section">
         <form method="post" action="{% url 'update_fixed_member_rate' %}" class="rate-edit-form">

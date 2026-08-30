@@ -15,7 +15,7 @@
     <div class="app">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-brand">Mess Manager</div>
+                <div class="sidebar-brand"><a href="{% url 'dashboard_home' %}">Mess Manager</a></div>
                 {% if current_cycle %}
                 <div class="sidebar-cycle">
                     <span class="cycle-label">{{ current_cycle.label }}</span>

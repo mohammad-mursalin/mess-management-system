@@ -13,7 +13,7 @@
     <div class="app">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-brand">Mess Manager</div>
+                <div class="sidebar-brand"><a href="{% url 'dashboard_home' %}">Mess Manager</a></div>
                 <div class="sidebar-cycle">
                     {% if current_cycle %}
                     <span class="cycle-label">{{ current_cycle.label }}</span>
@@ -49,9 +49,15 @@
     <div class="public-page">
         <header class="public-header">
             <div class="header-top">
-                <span class="mess-name">Mess Manager</span>
+                <a href="{% url 'dashboard_home' %}" class="mess-name">Mess Manager</a>
                 <a href="{% url 'login' %}" class="btn-ghost header-login-btn">Manager Login</a>
             </div>
+            <nav class="public-nav">
+                <a href="{% url 'bill_list' %}">Groceries</a>
+                <a href="{% url 'fixed_bill_list' %}">Bills</a>
+                <a href="{% url 'month_summary' %}">Month Summary</a>
+                <a href="{% url 'meal_history' %}">Meal History</a>
+            </nav>
             {% if current_cycle %}
             <span class="cycle-label">
                 {{ current_cycle.label }}

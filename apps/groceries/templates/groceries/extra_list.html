@@ -1,4 +1,4 @@
-{% extends 'base_manager.html' %}
+{% extends 'base_public.html' %}
 {% block title %}Extra Grocery — Mess Manager{% endblock %}
 
 {% block content %}
@@ -37,6 +37,7 @@
     {% endfor %}
 {% endif %}
 
+{% if user.is_authenticated %}
 <div class="card {% if not has_cycle or not is_current_cycle %}disabled-overlay{% endif %}">
     <div class="card-title">{{ editing_extra|yesno:"Edit Extra Grocery,Add Extra Grocery" }}</div>
 
@@ -86,6 +87,7 @@
         </div>
     </form>
 </div>
+{% endif %}
 
 <div class="table-view">
     <div class="table-wrap">
@@ -111,8 +113,10 @@
                     <td class="numeric">৳{{ extra.line_total }}</td>
                     <td>{{ extra.purchased_by.name }}</td>
                     <td class="actions-cell">
+                        {% if user.is_authenticated %}
                         <a href="{% url 'extra_edit' extra.id %}" class="action-link">Edit</a>
                         <form method="post" action="{% url 'extra_delete' extra.id %}" class="inline-block" onsubmit="return confirm('Delete this extra grocery entry?');">{% csrf_token %}<button type="submit" class="action-link-danger">Delete</button></form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
@@ -147,6 +151,7 @@
             <span class="card-field-label">Purchased By</span>
             <span class="card-field-value">{{ extra.purchased_by.name }}</span>
         </div>
+        {% if user.is_authenticated %}
         <div class="card-actions">
             <a href="{% url 'extra_edit' extra.id %}" class="card-btn-link">Edit</a>
             <form method="post" action="{% url 'extra_delete' extra.id %}" onsubmit="return confirm('Delete this extra grocery entry?');">
@@ -154,6 +159,7 @@
                 <button type="submit" class="card-btn-danger">Delete</button>
             </form>
         </div>
+        {% endif %}
     </div>
     {% empty %}
     <div class="list-card">

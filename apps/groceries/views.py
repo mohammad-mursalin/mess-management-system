@@ -26,7 +26,6 @@ def _has_previous():
     return Cycle.objects.filter(status='closed').exists()
 
 
-@login_required
 def bill_list(request):
     c, cycle_mode = _selected_cycle(request)
     bills = _bills_for(c)
@@ -87,7 +86,6 @@ def bill_delete(request, bill_id):
     return redirect('bill_list')
 
 
-@login_required
 def extra_list(request):
     c, cycle_mode = _selected_cycle(request)
     extras = _extras_for(c)

@@ -1,4 +1,4 @@
-{% extends 'base_manager.html' %}
+{% extends 'base_public.html' %}
 {% block title %}Groceries — Mess Manager{% endblock %}
 
 {% block content %}
@@ -37,6 +37,7 @@
     {% endfor %}
 {% endif %}
 
+{% if user.is_authenticated %}
 <div class="card {% if not has_cycle or not is_current_cycle %}disabled-overlay{% endif %}">
     <div class="card-title">{{ editing_bill|yesno:"Edit Grocery Bill,Add Grocery Bill" }}</div>
 
@@ -126,6 +127,7 @@
         </div>
     </form>
 </div>
+{% endif %}
 
 <div class="table-view">
     <div class="table-wrap">
@@ -175,8 +177,10 @@
                         {% endif %}
                     </td>
                     <td class="actions-cell">
+                        {% if user.is_authenticated %}
                         <a href="{% url 'bill_edit' bill.id %}" class="action-link">Edit</a>
                         <form method="post" action="{% url 'bill_delete' bill.id %}" class="inline-block" onsubmit="return confirm('Delete this grocery bill?');">{% csrf_token %}<button type="submit" class="action-link-danger">Delete</button></form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
@@ -220,6 +224,7 @@
             {% endfor %}
         </div>
         {% endif %}
+        {% if user.is_authenticated %}
         <div class="card-actions">
             <a href="{% url 'bill_edit' bill.id %}" class="card-btn-link">Edit</a>
             <form method="post" action="{% url 'bill_delete' bill.id %}" onsubmit="return confirm('Delete this grocery bill?');">
@@ -227,6 +232,7 @@
                 <button type="submit" class="card-btn-danger">Delete</button>
             </form>
         </div>
+        {% endif %}
     </div>
     {% empty %}
     <div class="list-card">

@@ -49,7 +49,6 @@ def _ctx(cycle, bills, form, editing_bill, editing, cycle_mode='current', is_cur
     }
 
 
-@login_required
 def bill_list(request):
     c, cycle_mode = _selected_cycle(request)
     bills = _bills_for(c)

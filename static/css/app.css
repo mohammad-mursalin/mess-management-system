@@ -721,10 +721,18 @@ body {
 .sidebar-brand {
     font-size: 16px;
     font-weight: 600;
-    color: var(--color-primary);
     padding: 0 16px 16px;
     border-bottom: 1px solid var(--color-border);
     margin-bottom: 8px;
+}
+
+.sidebar-brand a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.sidebar-brand a:hover {
+    opacity: 0.8;
 }
 
 .sidebar-cycle {
@@ -1530,6 +1538,11 @@ button,
     font-size: 20px;
     font-weight: 600;
     color: var(--color-primary);
+    text-decoration: none;
+}
+
+.public-header .mess-name:hover {
+    opacity: 0.8;
 }
 
 .header-top {
@@ -1537,6 +1550,34 @@ button,
     justify-content: space-between;
     align-items: center;
     gap: 8px;
+    margin-bottom: 8px;
+}
+
+.public-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.public-nav a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    padding: 4px 4px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    min-height: var(--touch-target);
+    display: inline-flex;
+    align-items: center;
+}
+
+.public-nav a:hover {
+    background: var(--color-bg);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 .header-login-btn {
